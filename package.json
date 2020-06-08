@@ -4,8 +4,9 @@
   "description": "Api RESTfull",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "serve": "nodemon index.js"
   },
   "author": "Johny Villegas",
   "license": "MIT",
