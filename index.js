@@ -8,7 +8,7 @@ mongoose.Promise = global.Promise;
 mongoose.set('useFindAndModify', false);
 
 mongoose
-  .connect("mongodb://localhost:27017/api-rest-lector", {
+  .connect("mongodb://'root':''@ds125486.mlab.com:25486/heroku_rdjrb2g0", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
