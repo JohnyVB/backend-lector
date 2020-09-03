@@ -1,59 +1,152 @@
 const validator = require("validator");
 const articleModel = require("../models/articleModel");
+const userModel = require('../models/userModel');
+const chapterModel = require('../models/chapterModel');
 const fs = require('fs');
 const path = require('path');
+const { log } = require("console");
 
 
 const controller = {
+
+  //------------------------Articulos populate capitulos-------------------------------------------------------------
+  getChaptersPopulate: (req, res) => {
+
+    const articleId = req.params.id;
+
+    if (!articleId || articleId == null || articleId == undefined) {
+      return res.status(404).send({
+        status: "error",
+        message: "Libro no encontrado!!",
+      });
+    }
+
+    articleModel.findOne({ _id: articleId }).populate({path: 'chapter', options: {sort: {numcap: -1}}}).exec((err, article) => {
+      if (err) {
+        return res.status(404).send({
+          status: "error",
+          message: "Error en la consulta populate",
+          err
+        });
+      }
+
+      return res.status(200).send({
+        status: "success",
+        article,
+      });
+    });
+  },
+
+  //------------------------Mostrar todos los libros por ultimo capitulo mas populate limit 12--------------------------------
+  getArticlesPopulateLimit: (req, res) => {
+    articleModel.find({}).populate('chapter').sort({ chapter: -1 }).limit(12).exec((err, articlesPopulate) => {
+      if (err || !articlesPopulate) {
+        return res.status(404).send({
+          status: "error",
+          message: 'Error al devolver los articulos',
+          err
+
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        articlesPopulate
+      });
+    });
+  },
+
+  //------------------------Mostrar todos los libros por ultimo capitulo mas populate limit lastchapters--------------------
+  getArticlesPopulate: (req, res) => {
+    articleModel.find({}).populate('chapter').sort({ chapter: -1 }).exec((err, articlesPopulate) => {
+      if (err || !articlesPopulate) {
+        return res.status(404).send({
+          status: "error",
+          message: 'Error al devolver los articulos',
+          err
+
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        articlesPopulate
+      });
+    });
+  },
+
   //------------------------Guardar libros-------------------------------------------------------------
   saveArticle: (req, res) => {
     //Recoger parametros por post
-    var params = req.body;
+    const { title, description, type, genders, state } = req.body;
+    const userId = req.params.id;
+
 
     //Validar datos (validator)
     try {
-      var validate_title = !validator.isEmpty(params.title);
-      var validate_description = !validator.isEmpty(params.description);
-      var validate_type = !validator.isEmpty(params.type);
-      var validate_genders = !validator.isEmpty(params.genders);
-      var validate_state = !validator.isEmpty(params.state);
+      var validate_title = !validator.isEmpty(title);
+      var validate_description = !validator.isEmpty(description);
+      var validate_type = !validator.isEmpty(type);
     } catch (err) {
-      return res.status(200).send({
+      return res.status(400).send({
         status: "error",
         message: "faltan datos por enviar !!!",
+        err
       });
     }
 
     if (
       validate_title &&
       validate_description &&
-      validate_type &&
-      validate_genders &&
-      validate_state
+      validate_type
     ) {
       //Crear el objeto a guardar
       var articleM = new articleModel();
 
       //Asignar valores
-      articleM.title = params.title;
-      articleM.description = params.description;
-      articleM.image = '';
-      articleM.type = params.type;
-      articleM.genders = params.genders;
-      articleM.state = params.state;
+      articleM.title = title;
+      articleM.description = description;
+      articleM.type = type;
+      articleM.genders = genders;
+      articleM.state = state;
 
       //Guardar el articulo
-      articleM.save((err, articleMStored) => {
-        if (err || !articleMStored) {
+      articleM.save((err, articleStored) => {
+        if (err || !articleStored) {
           return res.status(404).send({
             status: "error",
             message: "Los datos no se han guardado correctamente !!!",
           });
         } else {
-          //Devolver una respuesta
-          return res.status(200).send({
-            status: "success",
-            articleM: articleMStored,
+
+          let update = {
+            $push:{
+              article: articleStored._id
+            }
+          };
+
+          userModel.findByIdAndUpdate({_id: userId}, update, {new:true}, (err, userUpdated)=>{
+            if(err){
+              return res.status(400).send({
+                status: "error",
+                message: "Error al guardar el id del libro al usuario",
+                error: err
+              });
+            }
+
+            if (!userUpdated) {
+              return res.status(401).send({
+                status: "error",
+                message: "Error, no existe el usuario con id:"+ articleStored._id,
+                user: userUpdated
+              });
+            }
+
+            return res.status(200).send({
+              status: "success",
+              articleStored,
+              userUpdated
+            });
           });
         }
       });
@@ -65,77 +158,9 @@ const controller = {
     }
   },
   
-  //------------------------Guardar capitulos en los libros--------------------------------------------------
-  saveChapter: (req, res) => {
-    //Recoger el id del articulo por la url
-    let articleId = req.params.id;
-
-    //Recoger lo datos que llegan por put
-    let params = req.body;
-
-    //Validar los datos
-    try {
-      var validator_numcap = !validator.isEmpty(params.numcap);
-      var validator_titlecap = !validator.isEmpty(params.titlecap);
-      var validator_imagep = !validator.isEmpty(params.imagep);
-    } catch (err) {
-      return res.status(404).send({
-        status: "error",
-        message: "Error faltan datos",
-      });
-    }
-
-    if (validator_numcap && validator_titlecap && validator_imagep) {
-      //Asignar valores
-      let update = {
-        $push: {
-          chapters: {
-            numcap: params.numcap,
-            titlecap: params.titlecap,
-            imgpage: {
-              imagep: params.imagep,
-            },
-          },
-        },
-      };
-
-      articleModel.findOneAndUpdate(
-        { _id: articleId },
-        update,
-        { new: true },
-        (err, articleUpdated) => {
-          if (err) {
-            return res.status(404).send({
-              status: "error",
-              message: "No se pudo guardar los datos",
-            });
-          }
-
-          if (!articleUpdated) {
-            return res.status(404).send({
-              status: "error",
-              message: "No hay datos para mostrar",
-            });
-          }
-
-          return res.status(200).send({
-            status: "success",
-            article: articleUpdated,
-          });
-        }
-      );
-    } else {
-      //Devolver una respuesta
-      return res.status(404).send({
-        status: "error",
-        message: "faltan datos",
-      });
-    }
-  },
-
-  //------------------------Listar todos los libros por orden alfabetico del titulo---------------------------
-  getArticles: (req, res) => {
-    articleModel.find({}).sort('title').exec((err, articles) => {
+  //------------------------Listar todos los libros por orden alfabetico del titulo limit 12 home books---------------------------
+  getArticlesLimit: (req, res) => {
+    articleModel.find({}).sort({date: -1}).limit(12).exec((err, articles) => {
       if (err || !articles) {
         return res.status(404).send({
           status: "error",
@@ -150,11 +175,11 @@ const controller = {
     });
   },
 
-  //------------------------Listar todos los libros por ultimo añadido----------------------------------------------
+  //------------------------Listar todos los libros por ultimo añadido no limit lastbooks----------------------------------------------
   getArticlesUltimosArt: (req, res) => {
     articleModel
       .find({})
-      .sort('-date')
+      .sort({date: -1})
       .exec((err, articles) => {
         if (err || !articles) {
           return res.status(404).send({
@@ -190,7 +215,6 @@ const controller = {
       });
   },
 
-
   //------------------------Listar un solo libro---------------------------------------------------
   getArticle: (req, res) => {
 
@@ -219,9 +243,10 @@ const controller = {
   },
 
   //------------------------Borrar un libro------------------------------------------------------------------
-  delete: (req, res) => {
+  deleteArticle: (req, res) => {
 
-    let articleId = req.params.id;
+    const articleId = req.params.id;
+
 
     articleModel.findOneAndDelete({ _id: articleId }, (err, articleRemoved) => {
       if (err) {
@@ -237,11 +262,91 @@ const controller = {
           message: 'No se ha podido borrar los datos, datos ya no existen'
         });
       }
+      //Funcion eliminar lo capitulos del libro
+      if (articleRemoved.chapter.length != 0 || articleRemoved.chapter != "" || articleRemoved.chapter != undefined || articleRemoved.chapter != null) {
+        articleRemoved.chapter.forEach(chapter => {
+          chapterModel.findOneAndDelete({ _id: chapter }, (err, chapterRemoded) => {
+            if (err) {
+              return res.status(400).send({
+                status: "error",
+                message: "Error al eliminar los capitulos",
+                err
+              });
+            }
 
-      return res.status(200).send({
-        status: 'success',
-        article: articleRemoved
+            if (!chapterRemoded) {
+              return res.status(400).send({
+                status: "error",
+                message: "El capitulo ya no existe!!",
+                chapterRemoded
+              });
+            }
+
+            fs.unlink('./images/imgpages/'+chapterRemoded.imgpage, (err) => {
+              if (err) {
+                return res.status(200).send({
+                  status: 'error',
+                  message: 'Error al eliminar el archivo del capitulo',
+                  err
+                });
+              }
+            });
+
+            //-----------------Eliminar imagen de portada-------------------------------------------
+            if (articleRemoved.image != "" || articleRemoved.image != null || articleRemoved.image != undefined) {
+              fs.unlink('./images/imgcoverpages/' + articleRemoved.image, (err) => {
+
+                if (err) {
+                  return res.status(200).send({
+                    status: 'error',
+                    message: 'Error al eliminar la imagen de portada',
+                    err
+                  });
+                }
+
+              });
+            }
+          });
+        });
+      }
+      
+
+      //-------------------------Eliminar la referencia en usuario-------------------------------
+
+      let updated = {
+        $pull: {
+          article: articleId
+        }
+      }
+
+      userModel.findOneAndUpdate({ article: articleId }, updated, { new: true }, (err, userUpdated) => {
+        if (err) {
+          return res.status(200).send({
+            status: 'error',
+            message: 'Error al eliminar la referencia en usuario',
+            err
+          });
+        }
+
+        if (!userUpdated) {
+          return res.status(200).send({
+            status: 'error',
+            message: 'Error al eliminar la referencia en usuario vacio',
+            err
+          });
+        }
+
+        return res.status(200).send({
+          status: "success",
+          message: "Libro eliminado con exito y su refenrecia en usuarios con sus respectivos capitulos asociados"
+        });
       });
+      
+
+      
+
+      
+      
     });
   },
 
@@ -254,7 +359,7 @@ const controller = {
         message: 'Imagen no subida...'
       });
     }
-
+   
     var file_name = req.file.filename;
     var file_path = req.file.path;
     var original_name = req.file.originalname;
@@ -292,61 +397,6 @@ const controller = {
     }
   },
 
-  //------------------------Guardar Paginas del capitulo del libro----------------------------------------------------
-  uploadPages: (req, res) => {
-
-    if (!req.file) {
-      return res.status(404).send({
-        status: 'error',
-        message: 'Imagen no subida...'
-      });
-    }
-
-    var file_name = req.file.filename;
-    var file_path = req.file.path;
-    var original_name = req.file.originalname;
-    var name_split = original_name.split('.');
-    var img_extens = name_split[1];
-
-    if (img_extens != 'pdf') {
-      fs.unlink(file_path, (err) => {
-        return res.status(404).send({
-          status: 'error',
-          message: 'formato de imagen a subir no valido....',
-          format: img_extens
-        });
-      });
-    }else{
-
-      var articleId = req.params.id;
-
-      let update = {
-       $push: {
-         chapters: {
-           imgpage: {
-             imagep: file_name
-           }
-         }
-       } 
-      };
-
-      articleModel.findOneAndUpdate({_id: articleId}, update, {new:true}, (err, articleUpdated)=>{
-        if (err || !articleUpdated) {
-          return res.status(404).send({
-            status: 'error',
-            message: 'No se ha podido guardar el archivo'
-          });
-        }else{
-          return res.status(200).send({
-            status: 'success',
-            article: articleUpdated
-          });
-        }
-      });
-            
-    }
-  },
-
   //------------------------Mostrar imagen de portada----------------------------------------------------------------
   getCoverImage: (req, res) => {
 
@@ -362,6 +412,39 @@ const controller = {
           message: 'El archivo no existe...'
         });
       }
+    });
+  },
+
+  //------------------------Actualizar libro---------------------------------------------------------------------
+  updateArticle: (req, res) => {
+    
+    const articleId = req.params.id;
+    const params = req.body;
+
+    articleModel.findOneAndUpdate({_id: articleId}, params, {new:true}, (err, articleUpdated) => {
+      
+      if (err) {
+        return res.status(404).send({
+          status: "error",
+          message: "Error al actualizar",
+          err
+        });
+      }
+
+      if (!articleUpdated) {
+        return res.status(404).send({
+          status: "error",
+          message: "Error al actualizar vacio",
+          articleUpdated
+        });
+      }
+
+      return res.status(200).send({
+        status: "success",
+        articleUpdated
+      });
+
+      
     });
   },
 

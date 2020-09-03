@@ -10,25 +10,17 @@ const ArticleSchema = new mongoose.Schema({
   //fecha de publicacion
   date: { type: Date, default: Date.now },
   //Imagen de portada
-  image: String,
+  image: { type: String, default: "" },
   //Tipo de libro
   type: String,
   //Generos del libro
-  genders: {type: Array, default: []},
+  genders: { type: Array, default: [] },
   //Estado del libro
   state: String,
+  //Autor
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   //capitulos del libro
-  chapters: [{
-    _id: false,
-    //Numero del capitulo
-    numcap: String,
-    //Titulo del capitulo
-    titlecap: String,
-    //fecha de publicacion del capitulo
-    datechapter: { type: Date, default: Date.now },
-    //Paginas
-    imgpage: [{_id: false, imagep: String}]
-  }],
+  chapter: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chapter", default: "" }],
 });
 
 module.exports = mongoose.model("Article", ArticleSchema);

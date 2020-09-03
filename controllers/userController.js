@@ -3,9 +3,37 @@ const userModel = require('../models/userModel');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const service = require('../services');
+const path = require('path');
 
 
 const controller = {
+    //------------------------Mostrar articulos por usuario con populate---------------------------------
+    getArticlesPopulate: (req, res) => {
+
+        const userId = req.params.id;
+
+        if (!userId || userId == null || userId == undefined) {
+            return res.status(404).send({
+                status: 'error',
+                message: 'Usuario no existe'
+            });
+        }
+
+        userModel.findOne({ _id: userId }).populate({ path: 'article', options: { sort: { date: -1 } } }).exec((err, user) => {
+            if (err) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'Error en la consulta',
+                    err
+                });
+            }
+
+            return res.status(200).send({
+                status: 'success',
+                user
+            });
+        });
+    },
 
     //------------------------Guardar usuario-----------------------------------------------------------
     saveUser: (req, res) => {
@@ -28,17 +56,19 @@ const controller = {
 
         if (validate_name && validate_lastname && validate_email && validate_user && validate_password) {
 
-            var userM = new userModel();
-            var bcrypt_salts = 12;//Numero de saltos para el hash
+            const userM = new userModel();
+
+            //Numero de saltos para el hash
+            const bcrypt_salts = 12;
 
             userM.name = params.name;
             userM.lastname = params.lastname;
-            userM.image = '';
             userM.email = params.email;
             userM.user = params.user;
             userM.password = params.password;
 
-            bcrypt.hash(userM.password, bcrypt_salts).then((hashedPassword) => {//Utilizamos la funcion hash() le pasamos el dato a encriptar y los saltos, la promesa nos devuelve el datos encriptado
+            //Utilizamos la funcion hash() le pasamos el dato a encriptar y los saltos, la promesa nos devuelve el dato encriptado
+            bcrypt.hash(userM.password, bcrypt_salts).then((hashedPassword) => {
                 userM.password = hashedPassword;
                 userM.save((err, userStored) => {
 
@@ -56,7 +86,7 @@ const controller = {
                         });
                     }
                 });
-               
+
             }).catch((err) => {
                 return res.status(404).send({
                     status: 'error',
@@ -130,7 +160,7 @@ const controller = {
             if (exists) {
                 return res.sendFile(path.resolve(filepath));
             } else {
-                return res.status(200).send({
+                return res.status(404).send({
                     status: 'error',
                     message: 'El archivo no existe...'
                 });
@@ -154,6 +184,40 @@ const controller = {
                     users: users
                 });
             }
+        });
+    },
+
+    //------------------------Listar usuario con token------------------------------------------------
+    getUserToken: (req, res) => {
+        const token = req.params.token;
+
+        if (!token || token == undefined || token == null) {
+            return res.status(404).send({
+                status: 'error',
+                message: 'Token no encontrado'
+            });
+        }
+
+        userModel.findOne({ token: token }).exec((err, user) => {
+            if (err) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'Error en la consulta',
+                    err
+                });
+            }
+
+            if (!user || user == null || user == undefined) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No esta llegando usuario'
+                });
+            }
+
+            return res.status(200).send({
+                status: 'success',
+                user
+            });
         });
     },
 
@@ -183,37 +247,63 @@ const controller = {
         }
     },
 
+    //------------------------Listar usuario por libro------------------------------------------------
+    getUserXArticle: (req, res) => {
+
+        var articleId = req.params.id;
+
+        if (!articleId || articleId == null || articleId == undefined) {
+            return res.status(404).send({
+                status: 'error',
+                message: 'Articulo no encontrado'
+            });
+        }
+
+        userModel.findOne({ article: articleId }).exec((err, user) => {
+            if (err) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'Error al realizar la consulta',
+                    err
+                });
+            }
+
+            if (!user || user == null || user == undefined) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No esta llegando usuario'
+                });
+            }
+
+            return res.status(200).send({
+                status: 'success',
+                user
+            });
+        });
+    },
+
+
     //------------------------Actualizar usuario---------------------------------------------------------
     updateUser: (req, res) => {
 
-        var userId = req.params.id;
-        var params = req.body;
-        var salts = 12;
-
-        bcrypt.hash( params.password, salts).then((hashedPassword)=>{
-            params.password = hashedPassword
-            userModel.findOneAndUpdate({ _id: userId }, params, { new: true }, (err, userUpdated) => {
-                if (err || !userUpdated) {
-                    return res.status(404).send({
-                        status: 'error',
-                        message: 'No se ha podido actualizar el usuario'
-                    });
-                } else {
-                    return res.status(200).send({
-                        status: 'success',
-                        user: userUpdated
-                    });
-                }
-            });
-        }).catch((err)=>{
-            return res.status(404).send({
-                status: 'error',
-                message: 'Error al encriptar la contraseña',
-                err
-            });
+        const userId = req.params.id;
+        const params = req.body;
+      
+        userModel.findOneAndUpdate({ _id: userId }, params, { new: true }, (err, userUpdated) => {
+            if (err || !userUpdated) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No se ha podido actualizar el usuario',
+                    err,
+                    userUpdated
+                });
+            } else {
+                return res.status(200).send({
+                    status: 'success',
+                    user: userUpdated
+                });
+            }
         });
-
-        
     },
 
     //------------------------Eliminar usuario--------------------------------------------------------
@@ -226,26 +316,41 @@ const controller = {
                     status: 'error',
                     message: 'No se ha podido borrar le usuario seleccionado'
                 });
-            } else {
+            }
+
+            fs.unlink("./images/imgusers/" + userRemoved.image, (err) => {
+                if (err) {
+                    return res.status(400).send({
+                        status: 'error',
+                        message: 'Error al eliminar la imagen del usuario',
+                        err
+                    });
+                }
+
                 return res.status(200).send({
                     status: 'success',
+                    message: 'Usuario eliminado con su imagen',
                     user: userRemoved
                 });
-            }
+            });
+
+
+
         });
     },
 
     //------------------------Login-------------------------------------------------------------------
     login: (req, res) => {
-    
-        userModel.findOne({ email: req.body.email.toLowerCase()}, (err, userload)=>{
 
+        const userLoad = {};
+        userModel.findOne({ email: req.body.email }, (err, userload) => {
+            this.userLoad = userload;
             if (!userload) {
                 return res.status(404).send({
                     status: 'Error',
                     message: 'El usuario no existe o email no encontrado!!'
                 });
-            }else if(err){
+            } else if (err) {
                 return res.status(500).send({
                     status: 'error',
                     message: 'Error al traer el email'
@@ -253,17 +358,40 @@ const controller = {
             }
 
 
-            bcrypt.compare(req.body.password, userload.password).then((samePassword)=>{
+            bcrypt.compare(req.body.password, userload.password).then((samePassword) => {
                 if (!samePassword) {
                     return res.status(403).send({
                         status: 'error',
                         message: 'La contraseña no coincide con la asociada con el email ingresado'
                     });
-                }else{
-                    return res.status(200).send({
-                        status: 'success',
-                        token: service.createToken(userload)
+                } else {
+
+                    const updated = {
+                        $set: {
+                            token: service.createToken(userLoad)
+                        }
+                    };
+
+                    userModel.findOneAndUpdate({ email: req.body.email }, updated, { new: true }, (err, userUpdated) => {
+                        if (err) {
+                            return res.status(404).send({
+                                status: 'error',
+                                message: 'Error en la consulta de actualizar token'
+                            });
+                        }
+                        if (!userUpdated || userUpdated == null || userUpdated == undefined) {
+                            return res.status(404).send({
+                                status: 'error',
+                                message: 'El usuario actualizado con el token no llega'
+                            });
+                        }
+
+                        return res.status(200).send({
+                            status: 'success',
+                            userUpdated
+                        });
                     });
+
                 }
             });
         });

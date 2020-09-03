@@ -4,9 +4,8 @@
   "description": "Api RESTfull",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "nodemon index.js"
+    "start": "nodemon index.js"
   },
   "author": "Johny Villegas",
   "license": "MIT",
@@ -24,6 +23,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "path": "^0.12.7",
+    "pdfjs": "^2.3.9",
     "validator": "^13.0.0"
   },
   "devDependencies": {
