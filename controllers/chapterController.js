@@ -60,22 +60,22 @@ const controller = {
                 }
                 articleModel.findByIdAndUpdate({ _id: articleId }, update, { new: true }, (err, articleUpdated) => {
                     if (err) {
-                        return res.status(400).send({ 
-                            status: "error", 
-                            message: "Error al guardar id de capitulo al libro", 
-                            err 
+                        return res.status(400).send({
+                            status: "error",
+                            message: "Error al guardar id de capitulo al libro",
+                            err
                         });
-                    } 
-                    
-                    
+                    }
+
+
                     if (!articleUpdated) {
 
                         return res.status(403).send({
                             status: "error",
                             message: "No hay libro no existe para este capitulo",
-                            
+
                         });
-                        
+
                     }
 
                     return res.status(200).send({
@@ -156,7 +156,7 @@ const controller = {
     deleteChapter: (req, res) => {
 
         const chapterId = req.params.id;
-        
+
 
         chapterModel.findOneAndDelete({ _id: chapterId }, (err, chapterRemoved) => {
 
@@ -183,7 +183,7 @@ const controller = {
                     chapter: chapterId
                 }
             }
-            
+
             articleModel.findOneAndUpdate({ chapter: chapterId }, update, { new: true }, (err, articleUpdated, next) => {
                 if (err) {
                     return res.status(400).send({
@@ -209,7 +209,7 @@ const controller = {
 
                 next();
             });
-            
+
             //-----------------------------Eliminar el archivo adjunto del capitulo eliminado------------------------------
             const file_path = "./images/imgpages/" + chapterRemoved.imgpage;
             fs.unlink(file_path, (err) => {
@@ -228,53 +228,42 @@ const controller = {
     updateChapter: (req, res) => {
 
         const chapterId = req.params.id;
-        const { titlecap, numcap } = req.body;
+        const {numcap, titlecap, imgpage} = req.body;
 
-        try {
-            const titlecap_validate = !validator.isEmpty(titlecap);
-            const numcap_validate = !validator.isEmpty(numcap);
-        } catch (err) {
-            return res.status(400).send({
-                status: "error",
-                message: "Faltan datos por enviar",
-                error: err
-            });
+        let update = {
+            $set: {
+                titlecap: titlecap,
+                numcap: numcap,
+                imgpage: imgpage
+            }
         }
 
-        if (titlecap_validate && numcap_validate) {
+        chapterModel.findOneAndUpdate({ _id: chapterId }, update, { new: true }, (err, chapterUpdated) => {
 
-            let update = {
-                $set: {
-                    numcap: numcap,
-                    titlecap: titlecap
-                }
+            if (err) {
+                return res.status(400).send({
+                    status: "error",
+                    message: "Error al actualizar el capitulo",
+                    error: err
+                });
             }
 
-            chapterModel.findOneAndUpdate({ _id: chapterId }, update, { new: true }, (err, chapterUpdated) => {
+            if (!chapterUpdated) {
+                return res.status(400).send({
+                    status: "error",
+                    message: "Capitulo no encontrado",
+                    chapter: chapterUpdated
+                });
+            }
 
-                if (err) {
-                    return res.status(400).send({
-                        status: "error",
-                        message: "Error al actualizar el capitulo",
-                        error: err
-                    });
-                }
-
-                if (!chapterUpdated) {
-                    return res.status(400).send({
-                        status: "error",
-                        message: "Capitulo no encontrado",
-                        chapter: chapterUpdated
-                    });
-                }
-            });
-
-        } else {
             return res.status(200).send({
-                status: "error",
-                message: "La validacion de los campos no es correcta"
+                status: 'success',
+                message: 'Capitulo actualizado',
+                chapter: chapterUpdated
             });
-        }
+        });
+
+
     },
 
     //------------------------Obtener un capitulo---------------------------------------------------------------------------

@@ -72,6 +72,7 @@ router.post("/save-chapter/:id", autentication.ensureAuthenticated, ChapterContr
 router.put("/upload-pages/:id", autentication.ensureAuthenticated, md_uploadPages.single('file0'), ChapterController.uploadPages);//Subir imagenes del capitulo en pdf
 router.delete("/delete-chapter/:id", autentication.ensureAuthenticated, ChapterController.deleteChapter); //Borrar capitulo
 router.put("/update-chapter/:id", autentication.ensureAuthenticated, ChapterController.updateChapter); //Actualizar capitulo
+router.get("/get-chapter/:id", autentication.ensureAuthenticated, ChapterController.getChapter); //Obtener un capitulo
 
 //Rutas usuario
 router.post("/upload-user/:id", md_uploadUsers.single('file0'), UserController.uploadImage);//Subir y tambien actualizar imagen de usuario
