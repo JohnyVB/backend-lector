@@ -318,7 +318,7 @@ const controller = {
 
             fs.unlink('./images/imgpages/'+chapterRemoded.imgpage, (err) => {
               if (err) {
-                return res.status(200).send({
+                return res.status(400).send({
                   status: 'error',
                   message: 'Error al eliminar el archivo del capitulo',
                   err
@@ -331,7 +331,7 @@ const controller = {
               fs.unlink('./images/imgcoverpages/' + articleRemoved.image, (err) => {
 
                 if (err) {
-                  return res.status(200).send({
+                  return res.status(400).send({
                     status: 'error',
                     message: 'Error al eliminar la imagen de portada',
                     err
@@ -355,7 +355,7 @@ const controller = {
 
       userModel.findOneAndUpdate({ article: articleId }, updated, { new: true }, (err, userUpdated) => {
         if (err) {
-          return res.status(200).send({
+          return res.status(404).send({
             status: 'error',
             message: 'Error al eliminar la referencia en usuario',
             err
@@ -363,7 +363,7 @@ const controller = {
         }
 
         if (!userUpdated) {
-          return res.status(200).send({
+          return res.status(404).send({
             status: 'error',
             message: 'Error al eliminar la referencia en usuario vacio',
             err
