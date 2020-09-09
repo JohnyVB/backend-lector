@@ -30,6 +30,8 @@ const UsuarioSchema = new mongoose.Schema({
     token: {type: String, default: ""},
     //Rol de usuario
     role: {type: String, default: "user"},
+    //Preferencia de lectura opciones: paginada | cascada
+    prefreader: {type: String, default: "paginada"},
     //Fecha de registro del usuario/autor
     regdate: { type: Date, default: Date.now },
     //Nombre de usuario del usuario/autor

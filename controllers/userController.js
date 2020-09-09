@@ -66,6 +66,7 @@ const controller = {
             userM.email = params.email;
             userM.user = params.user;
             userM.password = params.password;
+            userM.prefreader = params.prefreader;
 
             //Utilizamos la funcion hash() le pasamos el dato a encriptar y los saltos, la promesa nos devuelve el dato encriptado
             bcrypt.hash(userM.password, bcrypt_salts).then((hashedPassword) => {
