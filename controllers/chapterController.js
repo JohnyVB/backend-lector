@@ -200,14 +200,6 @@ const controller = {
                         articleUpdated
                     });
                 }
-
-                return res.status(400).send({
-                    status: "success",
-                    message: "Se ha eliminado el capitulo y su referencia en Articles",
-                    articleUpdated
-                });
-
-                next();
             });
 
             //-----------------------------Eliminar el archivo adjunto del capitulo eliminado------------------------------
@@ -220,6 +212,11 @@ const controller = {
                         err
                     });
                 }
+
+                return res.status(200).send({
+                    status: 'success',
+                    message: 'Archivo eliminado correctamente!!'
+                });
             });
         });
     },
