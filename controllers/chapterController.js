@@ -289,6 +289,7 @@ const controller = {
             if (!chapter) {
                 return res.status(400).send({
                     status: "error",
+                    message: "No hay capitulo",
                     chapter
                 });
             }
