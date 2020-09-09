@@ -324,6 +324,23 @@ const controller = {
                 err
             });
         });
+    },
+
+    getImgpage: (req, res) => {
+
+        var filename = req.params.image;
+        var filepath = './images/imgpages/' + filename;
+
+        fs.exists(filepath, (exists) => {
+            if (exists) {
+                return res.sendFile(path.resolve(filepath));
+            } else {
+                return res.status(200).send({
+                    status: 'error',
+                    message: 'El archivo no existe...'
+                });
+            }
+        });
     }
 
 }

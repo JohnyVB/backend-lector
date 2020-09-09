@@ -242,6 +242,40 @@ const controller = {
     });
   },
 
+  getArticleXchapter: (req, res) => {
+    const chapterId = req.params.chapterId;
+
+    if (!chapterId) {
+      return res.status(404).send({
+        status: 'error',
+        message: 'ID del capitulo vacio'
+      });
+    }
+
+    articleModel.findOne({chapter: chapterId}).exec((err, article)=>{
+      if (err) {
+        return res.status(404).send({
+          status: 'error',
+          message: 'Error en la consulta',
+          err
+        });
+      }
+
+      if (!article) {
+        return res.status(404).send({
+          status: 'error',
+          message: 'No encontro ningun articulo que coincide',
+          article
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        article
+      });
+    });
+  },
+
   //------------------------Borrar un libro------------------------------------------------------------------
   deleteArticle: (req, res) => {
 

@@ -66,6 +66,7 @@ router.get("/search/:search", ArticleController.search); //Buscar libro
 router.get("/get-chapters-populate/:id", ArticleController.getChaptersPopulate);
 router.get("/get-article-populate", ArticleController.getArticlesPopulateLimit);
 router.get("/get-articles-chapter", ArticleController.getArticlesPopulate);
+router.get("/get-articlexchapter/:chapterId", ArticleController.getArticleXchapter);
 
 //Rutas de las paginas
 router.post("/save-chapter/:id", autentication.ensureAuthenticated, ChapterController.saveChapter); //Guardar capitulo con sus paginas
@@ -73,6 +74,7 @@ router.put("/upload-pages/:id", autentication.ensureAuthenticated, md_uploadPage
 router.delete("/delete-chapter/:id", autentication.ensureAuthenticated, ChapterController.deleteChapter); //Borrar capitulo
 router.put("/update-chapter/:id", autentication.ensureAuthenticated, ChapterController.updateChapter); //Actualizar capitulo
 router.get("/get-chapter/:id", autentication.ensureAuthenticated, ChapterController.getChapter); //Obtener un capitulo
+router.get("/get-imgpages/:image", ChapterController.getImgpage);
 
 //Rutas usuario
 router.post("/upload-user/:id", md_uploadUsers.single('file0'), UserController.uploadImage);//Subir y tambien actualizar imagen de usuario
