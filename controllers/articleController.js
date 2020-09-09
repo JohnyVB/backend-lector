@@ -21,7 +21,7 @@ const controller = {
       });
     }
 
-    articleModel.findOne({ _id: articleId }).populate({path: 'chapter', options: {sort: {numcap: -1}}}).exec((err, article) => {
+    articleModel.findOne({ _id: articleId }).populate({ path: 'chapter', options: { sort: { numcap: -1 } } }).exec((err, article) => {
       if (err) {
         return res.status(404).send({
           status: "error",
@@ -120,13 +120,13 @@ const controller = {
         } else {
 
           let update = {
-            $push:{
+            $push: {
               article: articleStored._id
             }
           };
 
-          userModel.findByIdAndUpdate({_id: userId}, update, {new:true}, (err, userUpdated)=>{
-            if(err){
+          userModel.findByIdAndUpdate({ _id: userId }, update, { new: true }, (err, userUpdated) => {
+            if (err) {
               return res.status(400).send({
                 status: "error",
                 message: "Error al guardar el id del libro al usuario",
@@ -137,7 +137,7 @@ const controller = {
             if (!userUpdated) {
               return res.status(401).send({
                 status: "error",
-                message: "Error, no existe el usuario con id:"+ articleStored._id,
+                message: "Error, no existe el usuario con id:" + articleStored._id,
                 user: userUpdated
               });
             }
@@ -157,16 +157,16 @@ const controller = {
       });
     }
   },
-  
+
   //------------------------Listar todos los libros por orden alfabetico del titulo limit 12 home books---------------------------
   getArticlesLimit: (req, res) => {
-    articleModel.find({}).sort({date: -1}).limit(12).exec((err, articles) => {
+    articleModel.find({}).sort({ date: -1 }).limit(12).exec((err, articles) => {
       if (err || !articles) {
         return res.status(404).send({
           status: "error",
           message: "Error al devolver los articulos",
         });
-      }else{
+      } else {
         return res.status(200).send({
           status: "success",
           articles,
@@ -179,7 +179,7 @@ const controller = {
   getArticlesUltimosArt: (req, res) => {
     articleModel
       .find({})
-      .sort({date: -1})
+      .sort({ date: -1 })
       .exec((err, articles) => {
         if (err || !articles) {
           return res.status(404).send({
@@ -252,7 +252,7 @@ const controller = {
       });
     }
 
-    articleModel.findOne({chapter: chapterId}).exec((err, article)=>{
+    articleModel.findOne({ chapter: chapterId }).exec((err, article) => {
       if (err) {
         return res.status(404).send({
           status: 'error',
@@ -283,6 +283,21 @@ const controller = {
 
 
     articleModel.findOneAndDelete({ _id: articleId }, (err, articleRemoved) => {
+
+      if (articleRemoved.image != "" || articleRemoved.image != null || articleRemoved.image != undefined) {
+        fs.unlink('./images/imgcoverpages/' + articleRemoved.image, (err) => {
+
+          if (err) {
+            return res.status(400).send({
+              status: 'error',
+              message: 'Error al eliminar la imagen de portada',
+              err
+            });
+          }
+
+        });
+      }
+
       if (err) {
         return res.status(500).send({
           status: 'error',
@@ -316,7 +331,7 @@ const controller = {
               });
             }
 
-            fs.unlink('./images/imgpages/'+chapterRemoded.imgpage, (err) => {
+            fs.unlink('./images/imgpages/' + chapterRemoded.imgpage, (err) => {
               if (err) {
                 return res.status(400).send({
                   status: 'error',
@@ -326,61 +341,54 @@ const controller = {
               }
             });
 
-            //-----------------Eliminar imagen de portada-------------------------------------------
-            if (articleRemoved.image != "" || articleRemoved.image != null || articleRemoved.image != undefined) {
-              fs.unlink('./images/imgcoverpages/' + articleRemoved.image, (err) => {
+            return res.send({
+              message: 'Se ha eliminado correctamente'
+            });
+          });
+        });
+      }
 
-                if (err) {
-                  return res.status(400).send({
-                    status: 'error',
-                    message: 'Error al eliminar la imagen de portada',
-                    err
-                  });
-                }
+      userModel.findOne({ article: articleId }).exec((err, user) => {
 
+        if (err) {
+          return res.status(200).send({
+            status: 'success',
+            message: 'Usuario ya no existe'
+          });
+        }
+
+        if (user) {
+          let updated = {
+            $pull: {
+              article: articleId
+            }
+          }
+
+          userModel.findOneAndUpdate({ article: articleId }, updated, { new: true }, (err, userUpdated) => {
+            if (err) {
+              return res.status(404).send({
+                status: 'error',
+                message: 'Error al eliminar la referencia en usuario',
+                err
               });
             }
-          });
-        });
-      }
-      
 
-      //-------------------------Eliminar la referencia en usuario-------------------------------
+            if (!userUpdated) {
+              return res.status(404).send({
+                status: 'error',
+                message: 'Error al eliminar la referencia en usuario vacio',
+                err
+              });
+            }
 
-      let updated = {
-        $pull: {
-          article: articleId
-        }
-      }
-
-      userModel.findOneAndUpdate({ article: articleId }, updated, { new: true }, (err, userUpdated) => {
-        if (err) {
-          return res.status(404).send({
-            status: 'error',
-            message: 'Error al eliminar la referencia en usuario',
-            err
+            return res.status(200).send({
+              status: "success",
+              message: "Libro eliminado con exito y su refenrecia en usuarios con sus respectivos capitulos asociados"
+            });
           });
         }
-
-        if (!userUpdated) {
-          return res.status(404).send({
-            status: 'error',
-            message: 'Error al eliminar la referencia en usuario vacio',
-            err
-          });
-        }
-
-        return res.status(200).send({
-          status: "success",
-          message: "Libro eliminado con exito y su refenrecia en usuarios con sus respectivos capitulos asociados"
-        });
       });
-      
 
-      
-
-      
-      
     });
   },
 
@@ -393,7 +401,7 @@ const controller = {
         message: 'Imagen no subida...'
       });
     }
-   
+
     var file_name = req.file.filename;
     var file_path = req.file.path;
     var original_name = req.file.originalname;
@@ -435,12 +443,12 @@ const controller = {
   getCoverImage: (req, res) => {
 
     var filename = req.params.image;
-    var filepath = './images/imgcoverpages/'+filename;
+    var filepath = './images/imgcoverpages/' + filename;
 
-    fs.exists(filepath, (exists)=>{
+    fs.exists(filepath, (exists) => {
       if (exists) {
         return res.sendFile(path.resolve(filepath));
-      }else{
+      } else {
         return res.status(200).send({
           status: 'error',
           message: 'El archivo no existe...'
@@ -451,12 +459,12 @@ const controller = {
 
   //------------------------Actualizar libro---------------------------------------------------------------------
   updateArticle: (req, res) => {
-    
+
     const articleId = req.params.id;
     const params = req.body;
 
-    articleModel.findOneAndUpdate({_id: articleId}, params, {new:true}, (err, articleUpdated) => {
-      
+    articleModel.findOneAndUpdate({ _id: articleId }, params, { new: true }, (err, articleUpdated) => {
+
       if (err) {
         return res.status(404).send({
           status: "error",
@@ -478,7 +486,7 @@ const controller = {
         articleUpdated
       });
 
-      
+
     });
   },
 
@@ -489,16 +497,16 @@ const controller = {
 
     articleModel.find({
       "$or": [
-        { "title": { "$regex": seachString, "$options": "i" }},
+        { "title": { "$regex": seachString, "$options": "i" } },
         { "description": { "$regex": seachString, "$options": "i" } }
       ]
-    }).sort([['date', 'descending']]).exec((err, articles)=>{
+    }).sort([['date', 'descending']]).exec((err, articles) => {
       if (err) {
         return res.status(404).send({
           status: 'error',
           message: 'No hay libros con los parametros a buscar....'
         });
-      }else{
+      } else {
         return res.status(200).send({
           status: 'success',
           articles

@@ -319,21 +319,31 @@ const controller = {
                 });
             }
 
-            fs.unlink("./images/imgusers/" + userRemoved.image, (err) => {
-                if (err) {
-                    return res.status(400).send({
-                        status: 'error',
-                        message: 'Error al eliminar la imagen del usuario',
-                        err
-                    });
-                }
+            if (userRemoved.image) {
+                fs.unlink("./images/imgusers/" + userRemoved.image, (err) => {
+                    if (err) {
+                        return res.status(400).send({
+                            status: 'error',
+                            message: 'Error al eliminar la imagen del usuario',
+                            err
+                        });
+                    }
 
+                    return res.status(200).send({
+                        status: 'success',
+                        message: 'Usuario eliminado con su imagen',
+                        user: userRemoved
+                    });
+                });
+            }else{
                 return res.status(200).send({
                     status: 'success',
-                    message: 'Usuario eliminado con su imagen',
+                    message: 'Usuario eliminado',
                     user: userRemoved
-                });
-            });
+                }); 
+            }
+
+            
 
 
 
