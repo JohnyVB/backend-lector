@@ -281,22 +281,8 @@ const controller = {
 
     const articleId = req.params.id;
 
-
+    console.log(articleId);
     articleModel.findOneAndDelete({ _id: articleId }, (err, articleRemoved) => {
-
-      if (articleRemoved.image != "" || articleRemoved.image != null || articleRemoved.image != undefined) {
-        fs.unlink('./images/imgcoverpages/' + articleRemoved.image, (err) => {
-
-          if (err) {
-            return res.status(400).send({
-              status: 'error',
-              message: 'Error al eliminar la imagen de portada',
-              err
-            });
-          }
-
-        });
-      }
 
       if (err) {
         return res.status(500).send({
@@ -311,6 +297,20 @@ const controller = {
           message: 'No se ha podido borrar los datos, datos ya no existen'
         });
       }
+
+      if (articleRemoved.image != "" || articleRemoved.image != null || articleRemoved.image != undefined) {
+        fs.unlink('./images/imgcoverpages/' + articleRemoved.image, (err) => {
+
+          if (err) {
+            return res.status(400).send({
+              status: 'error',
+              message: 'Error al eliminar la imagen de portada',
+              err
+            });
+          }
+        });
+      }
+
       //Funcion eliminar lo capitulos del libro
       if (articleRemoved.chapter.length != 0 || articleRemoved.chapter != "" || articleRemoved.chapter != undefined || articleRemoved.chapter != null) {
         articleRemoved.chapter.forEach(chapter => {
@@ -340,55 +340,38 @@ const controller = {
                 });
               }
             });
-
-            return res.send({
-              message: 'Se ha eliminado correctamente'
-            });
           });
         });
       }
 
-      userModel.findOne({ article: articleId }).exec((err, user) => {
+      let updated = {
+        $pull: {
+          article: articleId
+        }
+      }
 
+      userModel.findOneAndUpdate({ article: articleId }, updated, { new: true }, (err, userUpdated) => {
         if (err) {
-          return res.status(200).send({
-            status: 'success',
-            message: 'Usuario ya no existe'
+          return res.status(404).send({
+            status: 'error',
+            message: 'Error al eliminar la referencia en usuario',
+            err
           });
         }
 
-        if (user) {
-          let updated = {
-            $pull: {
-              article: articleId
-            }
-          }
-
-          userModel.findOneAndUpdate({ article: articleId }, updated, { new: true }, (err, userUpdated) => {
-            if (err) {
-              return res.status(404).send({
-                status: 'error',
-                message: 'Error al eliminar la referencia en usuario',
-                err
-              });
-            }
-
-            if (!userUpdated) {
-              return res.status(404).send({
-                status: 'error',
-                message: 'Error al eliminar la referencia en usuario vacio',
-                err
-              });
-            }
-
-            return res.status(200).send({
-              status: "success",
-              message: "Libro eliminado con exito y su refenrecia en usuarios con sus respectivos capitulos asociados"
-            });
+        if (!userUpdated) {
+          return res.status(404).send({
+            status: 'error',
+            message: 'Error al eliminar la referencia en usuario vacio',
+            err
           });
         }
+
+        return res.status(200).send({
+          status: "success",
+          message: "Libro eliminado con exito y su refenrecia en usuarios con sus respectivos capitulos asociados"
+        });
       });
-
     });
   },
 
