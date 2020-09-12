@@ -281,7 +281,6 @@ const controller = {
 
     const articleId = req.params.id;
 
-    console.log(articleId);
     articleModel.findOneAndDelete({ _id: articleId }, (err, articleRemoved) => {
 
       if (err) {
