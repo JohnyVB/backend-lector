@@ -283,6 +283,39 @@ const controller = {
         });
     },
 
+    getUserXEmail: (req, res) => {
+        const email = req.params.email;
+        var emailOk = null;
+
+        if (!email || email == null || email == undefined) {
+            return res.status(404).send({
+                status: 'error',
+                message: 'No hay email para buscar'
+            });
+        }
+
+        userModel.findOne({email: email}).exec((err, user) => {
+            if (err) {
+                return res.status(400).send({
+                    status: 'error',
+                    message: 'Usuario no encontrado'
+                });
+            }
+
+            if (!user || user == null || user == undefined) {
+                emailOk = true;
+                return res.status(200).send({
+                    status: 'success',
+                    emailOk
+                });
+            }
+            emailOk = false;
+            return res.status(200).send({
+                status: 'success',
+                emailOk
+            });
+        });
+    },
 
     //------------------------Actualizar usuario---------------------------------------------------------
     updateUser: (req, res) => {

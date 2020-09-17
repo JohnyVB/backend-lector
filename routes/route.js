@@ -85,6 +85,7 @@ router.put("/update-user/:id", autentication.ensureAuthenticated, UserController
 router.delete("/delete-user/:id", autentication.ensureAuthenticated, UserController.deleteUser);//Eliminar usuario
 router.get("/get-user-populate/:id", UserController.getArticlesPopulate);
 router.get("/get-userxarticle/:id", UserController.getUserXArticle);
+router.get("/get-userxemail/:email", UserController.getUserXEmail);
 
 
 // Rutas de autenticación y login
