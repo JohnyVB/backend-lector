@@ -39,7 +39,7 @@ mongoose.connect("mongodb+srv://root:root3517@cluster0.p9hkj.mongodb.net/api-res
 
     //Crear servidor y escuchar peticiones HTTP
     app.listen(config.PORT, () => {
-      console.log('Servidor corriendo en http://localhost:' + config.PORT);
+      console.log('Servidor de BACKEND-LECTOR corriendo en el puerto: ' + config.PORT);
 
     });
   });
