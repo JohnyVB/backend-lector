@@ -1,7 +1,7 @@
 const validator = require('validator');
 const userModel = require('../models/userModel');
 const fs = require('fs');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const service = require('../services');
 const path = require('path');
 
