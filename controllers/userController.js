@@ -191,6 +191,7 @@ const controller = {
     //------------------------Listar usuario con token------------------------------------------------
     getUserToken: (req, res) => {
         const token = req.params.token;
+        console.log(token);
 
         if (!token || token == undefined || token == null) {
             return res.status(404).send({
