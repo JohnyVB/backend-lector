@@ -9,7 +9,7 @@
   "author": "Johny Villegas",
   "license": "MIT",
   "dependencies": {
-    "bcrypt": "^4.0.1",
+    "bcrypt-nodejs": "^4.0.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "env-cmd": "^10.1.0",
