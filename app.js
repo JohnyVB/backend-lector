@@ -3,7 +3,8 @@
 //Cargar modulos de node para crear el servidor
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors')
+const cors = require('cors');
+const config = require('./config');
 
 //Ejecutar express (http)
 const app = express();
@@ -12,10 +13,8 @@ const app = express();
 const route = require("./routes/route");
 
 //Middlewares
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cors());
-
 
 //CORS
 app.use((req, res, next) => {
@@ -28,7 +27,6 @@ app.use((req, res, next) => {
 
 //Añadir prefijos a rutas / cargar rutas
 app.use('/api', route);
-
 
 //Exportar modulo (fichero actual)
 module.exports = app;

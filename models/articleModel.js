@@ -19,6 +19,8 @@ const ArticleSchema = new mongoose.Schema({
   state: String,
   //Autor
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  //Comentarios del capitulo
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment", default: null}],
   //capitulos del libro
   chapter: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chapter", default: "" }],
 });

@@ -19,22 +19,24 @@ const controller = {
         status: "error",
         message: "Libro no encontrado!!",
       });
+    }else{
+      articleModel.findOne({ _id: articleId }).populate({ path: 'chapter', options: { sort: { numcap: -1 } } }).exec((err, article) => {
+        if (err) {
+          return res.status(404).send({
+            status: "error",
+            message: "Error en la consulta populate",
+            err
+          });
+        }else{
+          return res.status(200).send({
+            status: "success",
+            article,
+          });
+        }
+      });
     }
 
-    articleModel.findOne({ _id: articleId }).populate({ path: 'chapter', options: { sort: { numcap: -1 } } }).exec((err, article) => {
-      if (err) {
-        return res.status(404).send({
-          status: "error",
-          message: "Error en la consulta populate",
-          err
-        });
-      }
-
-      return res.status(200).send({
-        status: "success",
-        article,
-      });
-    });
+    
   },
 
   //------------------------Mostrar todos los libros por ultimo capitulo mas populate limit 12--------------------------------
@@ -47,12 +49,12 @@ const controller = {
           err
 
         });
+      }else{
+        return res.status(200).send({
+          status: 'success',
+          articlesPopulate
+        });
       }
-
-      return res.status(200).send({
-        status: 'success',
-        articlesPopulate
-      });
     });
   },
 
@@ -66,12 +68,13 @@ const controller = {
           err
 
         });
+      }else{
+        return res.status(200).send({
+          status: 'success',
+          articlesPopulate
+        });
       }
 
-      return res.status(200).send({
-        status: 'success',
-        articlesPopulate
-      });
     });
   },
 
@@ -186,12 +189,12 @@ const controller = {
             status: "error",
             message: "Error al devolver los articulos",
           });
+        }else{
+          return res.status(200).send({
+            status: "success",
+            articles,
+          });
         }
-
-        return res.status(200).send({
-          status: "success",
-          articles,
-        });
       });
   },
 
@@ -206,40 +209,42 @@ const controller = {
             status: "error",
             message: "Error al devolver los articulos",
           });
+        }else{
+          return res.status(200).send({
+            status: "success",
+            articles,
+          });
         }
-
-        return res.status(200).send({
-          status: "success",
-          articles,
-        });
       });
   },
 
   //------------------------Listar un solo libro---------------------------------------------------
   getArticle: (req, res) => {
 
-    var articleId = req.params.id;
+    const articleId = req.params.id;
 
     if (!articleId || articleId == null || articleId == undefined) {
       return res.status(404).send({
         status: "error",
         message: "Libro no encontrado!!",
       });
+    }else{
+      articleModel.findById(articleId, (err, article) => {
+        if (err || !article) {
+          return res.status(500).send({
+            status: "error",
+            message: "No se pudo cargar el libro!!",
+          });
+        }else{
+          return res.status(200).send({
+            status: "success",
+            article
+          });
+        }
+      });
     }
 
-    articleModel.findById(articleId, (err, article) => {
-      if (err || !article) {
-        return res.status(500).send({
-          status: "error",
-          message: "No se pudo cargar el libro!!",
-        });
-      }
-
-      return res.status(200).send({
-        status: "success",
-        article
-      });
-    });
+    
   },
 
   getArticleXchapter: (req, res) => {
@@ -250,30 +255,32 @@ const controller = {
         status: 'error',
         message: 'ID del capitulo vacio'
       });
-    }
+    }else{
+      articleModel.findOne({ chapter: chapterId }).exec((err, article) => {
+        if (err) {
+          return res.status(404).send({
+            status: 'error',
+            message: 'Error en la consulta',
+            err
+          });
+        }
 
-    articleModel.findOne({ chapter: chapterId }).exec((err, article) => {
-      if (err) {
-        return res.status(404).send({
-          status: 'error',
-          message: 'Error en la consulta',
-          err
-        });
-      }
+        if (!article) {
+          return res.status(404).send({
+            status: 'error',
+            message: 'No encontro ningun articulo que coincide',
+            article
+          });
+        }
 
-      if (!article) {
-        return res.status(404).send({
-          status: 'error',
-          message: 'No encontro ningun articulo que coincide',
+        return res.status(200).send({
+          status: 'success',
           article
         });
-      }
-
-      return res.status(200).send({
-        status: 'success',
-        article
       });
-    });
+    }
+
+    
   },
 
   //------------------------Borrar un libro------------------------------------------------------------------
@@ -475,7 +482,7 @@ const controller = {
   //------------------------Buscar libro-----------------------------------------------------------------------------
   search: (req, res) => {
 
-    var seachString = req.params.search;
+    const seachString = req.params.search;
 
     articleModel.find({
       "$or": [

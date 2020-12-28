@@ -8,7 +8,7 @@ const UsuarioSchema = new mongoose.Schema({
     //Apellidos del usuario/autor
     lastname: String,
     //Imagen del usuario/autor
-    image: { type: String, default: ""},
+    image: { type: String, default: null},
     //Libros publicados del usuario/autor
     article: [{ type: mongoose.Schema.Types.ObjectId, ref: "Article", default: ""}],
     //Email del usuario/autor

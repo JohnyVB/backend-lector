@@ -154,15 +154,21 @@ const controller = {
     //------------------------Mostrar imagen de usuario------------------------------------------------
     getCoverImageUser: (req, res) => {
 
-        var filename = req.params.image;
-        var filepath = './images/imgusers/' + filename;
+        const filename = req.params.image;
+        const filepath = './images/imgusers/' + filename;
+
+        if (!filename || filename === null) {
+            return res.status(200).send({
+                status: 'success',
+                message: 'el usuario no tiene imagen'
+            });
+        }
 
         fs.exists(filepath, (exists) => {
             if (exists) {
                 return res.sendFile(path.resolve(filepath));
             } else {
-                return res.status(404).send({
-                    status: 'error',
+                return res.status(200).send({
                     message: 'El archivo no existe...'
                 });
             }
@@ -203,15 +209,13 @@ const controller = {
             if (err) {
                 return res.status(404).send({
                     status: 'error',
-                    message: 'Error en la consulta',
-                    err
+                    message: 'Error en la consulta'
                 });
             }
 
             if (!user || user == null || user == undefined) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'No esta llegando usuario'
+                return res.status(200).send({
+                    message: 'No hay usuario logeado'
                 });
             }
 
@@ -224,28 +228,34 @@ const controller = {
 
     //------------------------Listar usuario----------------------------------------------------------
     getUser: (req, res) => {
-        var userId = req.params.id;
+        const userId = req.params.id;
 
         if (!userId || userId == null || userId == undefined) {
             return res.status(404).send({
                 status: 'error',
                 message: 'Usuario no encontrado'
             });
-        } else {
-            userModel.findById(userId, (err, user) => {
-                if (err || !user) {
-                    return res.status(500).send({
-                        status: 'error',
-                        message: 'No se ha podido cargar el usuario'
-                    });
-                } else {
-                    return res.status(200).send({
-                        status: 'success',
-                        user: user
-                    });
-                }
-            });
         }
+        userModel.findOne({ _id: userId }, (err, user) => {
+            if (err) {
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'No se ha podido cargar el usuario'
+                });
+            }
+            if (!user) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No hay usuario'
+                }); 
+            }
+            return res.status(200).send({
+                status: 'success',
+                user
+            });
+
+        });
+
     },
 
     //------------------------Listar usuario por libro------------------------------------------------
@@ -294,7 +304,7 @@ const controller = {
             });
         }
 
-        userModel.findOne({email: email}).exec((err, user) => {
+        userModel.findOne({ email: email }).exec((err, user) => {
             if (err) {
                 return res.status(400).send({
                     status: 'error',
@@ -322,7 +332,7 @@ const controller = {
 
         const userId = req.params.id;
         const params = req.body;
-      
+
         userModel.findOneAndUpdate({ _id: userId }, params, { new: true }, (err, userUpdated) => {
             if (err || !userUpdated) {
                 return res.status(404).send({
@@ -368,15 +378,15 @@ const controller = {
                         user: userRemoved
                     });
                 });
-            }else{
+            } else {
                 return res.status(200).send({
                     status: 'success',
                     message: 'Usuario eliminado',
                     user: userRemoved
-                }); 
+                });
             }
 
-            
+
 
 
 

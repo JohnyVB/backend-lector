@@ -5,6 +5,7 @@ const express = require("express");
 const ArticleController = require("../controllers/articleController");
 const UserController = require("../controllers/userController");
 const ChapterController = require("../controllers/chapterController");
+const CommentController = require("../controllers/commentController");
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -79,22 +80,30 @@ router.get("/get-imgpages/:image", ChapterController.getImgpage);
 //Rutas usuario
 router.post("/upload-user/:id", md_uploadUsers.single('file0'), UserController.uploadImage);//Subir y tambien actualizar imagen de usuario
 router.get("/get-users", autentication.ensureAuthenticated, UserController.getUsers);//Listar usuarios
-router.get("/get-image-user/:image", UserController.getCoverImageUser);
-router.get("/get-user/:id", autentication.ensureAuthenticated, UserController.getUser);//Listar un usuario
+router.get("/get-image-user/:image?", UserController.getCoverImageUser);
+router.get("/get-user/:id", UserController.getUser);//Listar un usuario
 router.put("/update-user/:id", autentication.ensureAuthenticated, UserController.updateUser);//Actualizar un usuario
 router.delete("/delete-user/:id", autentication.ensureAuthenticated, UserController.deleteUser);//Eliminar usuario
 router.get("/get-user-populate/:id", UserController.getArticlesPopulate);
 router.get("/get-userxarticle/:id", UserController.getUserXArticle);
 router.get("/get-userxemail/:email", UserController.getUserXEmail);
 
+//Rutas de comentarios
+router.get("/get-commentspopulate/:id/:reader", CommentController.getCommentsPopulate);
+router.get("/get-comments", CommentController.getComments);
+router.get("/get-comment/:id", CommentController.getComment);
+router.post("/save-comment/:id/:reader", autentication.ensureAuthenticated, CommentController.saveComment);
+router.put("/update-comment/:id", CommentController.updateComment);
+router.get("/search-comment/:searchComment",CommentController.searchComment);
+router.delete("/delete-comment/:id", CommentController.deleteComment);
 
 // Rutas de autenticación y login
 router.post("/save-user", UserController.saveUser); //Guardar usuario
 router.post("/login", UserController.login);
-router.get("/get-usertoken/");
 router.get("/get-usertoken/:token", UserController.getUserToken);
 router.get("/get-userxtoken/:token", UserController.getUserToken);
 
+router.get("/error", CommentController.error);
 
 
 module.exports = router;
