@@ -431,11 +431,38 @@ const controller = {
   //------------------------Mostrar imagen de portada----------------------------------------------------------------
   getCoverImage: (req, res) => {
 
-    var filename = req.params.image;
-    var filepath = './images/imgcoverpages/' + filename;
-
+    const filename = req.params.image;
+    const filepath = './images/imgcoverpages/' + filename;
+    /*
     fs.exists(filepath, (exists) => {
       if (exists) {
+        return res.sendFile(path.resolve(filepath));
+      } else {
+        return res.status(200).send({
+          status: 'error',
+          message: 'El archivo no existe...'
+        });
+      }
+    });
+  */
+    fs.stat(filepath, (err) => {
+      if (!err) {
+        return res.sendFile(path.resolve(filepath));
+      } else {
+        return res.status(200).send({
+          status: 'error',
+          message: 'El archivo no existe...'
+        });
+      }
+    });
+  },
+
+  getDefaultImage: (req, res) => {
+    const filename = req.params.image;
+    const filepath = "./images/" + filename;
+
+    fs.stat(filepath, (err) => {
+      if (!err) {
         return res.sendFile(path.resolve(filepath));
       } else {
         return res.status(200).send({

@@ -63,6 +63,7 @@ router.get("/book/:id", ArticleController.getArticle); //Mostrar un libro
 router.delete("/delete-book/:id", autentication.ensureAuthenticated, ArticleController.deleteArticle);
 router.post("/upload-coverpages/:id", md_uploadCoverPages.single('file0'), ArticleController.uploadCoverPages); //Subir imagen de portada
 router.get("/get-coverimage/:image", ArticleController.getCoverImage); //Mostrar portada de la imagen
+router.get("/get-defaultimage/:image", ArticleController.getDefaultImage);
 router.get("/search/:search", ArticleController.search); //Buscar libro
 router.get("/get-chapters-populate/:id", ArticleController.getChaptersPopulate);
 router.get("/get-article-populate", ArticleController.getArticlesPopulateLimit);
