@@ -6,6 +6,7 @@ const ArticleController = require("../controllers/articleController");
 const UserController = require("../controllers/userController");
 const ChapterController = require("../controllers/chapterController");
 const CommentController = require("../controllers/commentController");
+const NotifyController = require("../controllers/notifyController");
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -65,7 +66,7 @@ router.post("/upload-coverpages/:id", md_uploadCoverPages.single('file0'), Artic
 router.get("/get-coverimage/:image", ArticleController.getCoverImage); //Mostrar portada de la imagen
 router.get("/get-defaultimage/:image", ArticleController.getDefaultImage);
 router.get("/search/:search", ArticleController.search); //Buscar libro
-router.get("/get-chapters-populate/:id", ArticleController.getChaptersPopulate);
+router.get("/get-chapters-populate/:id/:reader", ArticleController.getChaptersPopulate);
 router.get("/get-article-populate", ArticleController.getArticlesPopulateLimit);
 router.get("/get-articles-chapter", ArticleController.getArticlesPopulate);
 router.get("/get-articlexchapter/:chapterId", ArticleController.getArticleXchapter);
@@ -86,7 +87,7 @@ router.get("/get-user/:id", UserController.getUser);//Listar un usuario
 router.put("/update-user/:id", autentication.ensureAuthenticated, UserController.updateUser);//Actualizar un usuario
 router.delete("/delete-user/:id", autentication.ensureAuthenticated, UserController.deleteUser);//Eliminar usuario
 router.get("/get-user-populate/:id", UserController.getArticlesPopulate);
-router.get("/get-userxarticle/:id", UserController.getUserXArticle);
+router.get("/get-userxarticle/:id/:reader", UserController.getUserXArticle);
 router.get("/get-userxemail/:email", UserController.getUserXEmail);
 
 //Rutas de comentarios
@@ -97,6 +98,11 @@ router.post("/save-comment/:id/:reader", autentication.ensureAuthenticated, Comm
 router.put("/update-comment/:id", CommentController.updateComment);
 router.get("/search-comment/:searchComment",CommentController.searchComment);
 router.delete("/delete-comment/:id", CommentController.deleteComment);
+
+//Rutas notificaciones
+router.get("/get-notify/:id", NotifyController.getNotifyPopulate);
+router.post("/save-notify/:id", autentication.ensureAuthenticated, NotifyController.saveNotify);
+router.put("/update-alert-notify/:id", autentication.ensureAuthenticated, NotifyController.updateAlertNotify);
 
 // Rutas de autenticación y login
 router.post("/save-user", UserController.saveUser); //Guardar usuario

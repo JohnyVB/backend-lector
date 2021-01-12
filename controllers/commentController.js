@@ -14,11 +14,11 @@ const controller = {
                 status: 'error',
                 message: 'Id del libro no encontrado!!'
             });
-        } 
+        }
 
         if (reader === 'true') {
-            
-            chapterModel.findOne({ _id: articleId }).populate({ path: 'comments', populate: { path: 'userid' } }).exec((err, article) => {
+
+            chapterModel.findOne({ _id: articleId }).populate({ path: 'comments', populate: { path: 'userid' }, options: { sort: { date: -1 } } }).exec((err, article) => {
                 if (!article || err) {
                     return res.status(200).send({
                         status: 'success',
@@ -31,8 +31,8 @@ const controller = {
                     article
                 });
             });
-        } else if(reader === 'false') {
-            articleModel.findOne({ _id: articleId }).populate({ path: 'comments', populate: { path: 'userid' } }).exec((err, article) => {
+        } else if (reader === 'false') {
+            articleModel.findOne({ _id: articleId }).populate({ path: 'comments', populate: { path: 'userid' }, options: { sort: { date: -1 } } }).exec((err, article) => {
                 if (!article || err) {
                     return res.status(200).send({
                         status: 'warn',
@@ -47,12 +47,6 @@ const controller = {
             });
         }
 
-        
-        
-        
-        
-        
-               
     },
 
     getComments: (req, res) => {
@@ -139,7 +133,7 @@ const controller = {
                 }
             };
 
-            
+
             if (reader === 'true') {
                 chapterModel.findOneAndUpdate({ _id: articleId }, update, { new: true }, (err, articleStored) => {
                     if (err || !articleStored) {
@@ -154,7 +148,7 @@ const controller = {
                         message: 'Se ha guardado todo correctamente....'
                     });
                 });
-            }else if (reader === 'false') {
+            } else if (reader === 'false') {
                 articleModel.findOneAndUpdate({ _id: articleId }, update, { new: true }, (err, articleStored) => {
                     if (err || !articleStored) {
                         return res.status(404).send({
@@ -169,8 +163,8 @@ const controller = {
                     });
                 });
             }
-            
-            
+
+
         });
     },
 

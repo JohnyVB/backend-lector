@@ -4,6 +4,8 @@ const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const service = require('../services');
 const path = require('path');
+const chapterModel = require('../models/chapterModel');
+const articleModel = require('../models/articleModel');
 
 
 const controller = {
@@ -205,7 +207,7 @@ const controller = {
             });
         }
 
-        userModel.findOne({ token: token }).exec((err, user) => {
+        userModel.findOne({ token: token }).populate({ path: 'notify'}).exec((err, user) => {
             if (err) {
                 return res.status(404).send({
                     status: 'error',
@@ -261,7 +263,8 @@ const controller = {
     //------------------------Listar usuario por libro------------------------------------------------
     getUserXArticle: (req, res) => {
 
-        var articleId = req.params.id;
+        const articleId = req.params.id;
+        const reader = req.params.reader;
 
         if (!articleId || articleId == null || articleId == undefined) {
             return res.status(404).send({
@@ -270,27 +273,70 @@ const controller = {
             });
         }
 
-        userModel.findOne({ article: articleId }).exec((err, user) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error al realizar la consulta',
-                    err
-                });
-            }
+        if (reader === 'true') {
+            articleModel.findOne({ chapter: articleId }).exec((err, article) => {
 
-            if (!user || user == null || user == undefined) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'No esta llegando usuario'
-                });
-            }
+                if (err) {
+                    return res.status(404).send({
+                        status: 'error',
+                        message: 'Error en la consulta..'
+                    })
+                }
 
-            return res.status(200).send({
-                status: 'success',
-                user
+                if (!article) {
+                    return res.status(200).send({
+                        status: 'success',
+                        message: 'No hay articulo con ese id...'
+                    })
+                }
+
+                userModel.findOne({ article: article._id}).exec((err, user) => {
+                    if (err) {
+                        return res.status(404).send({
+                            status: 'error',
+                            message: 'Error en la consulta..'
+                        })
+                    }
+
+                    if (!user) {
+                        return res.status(200).send({
+                            status: 'success',
+                            message: 'No hay articulo con ese id...'
+                        })
+                    }
+
+                    return res.status(200).send({
+                        status: 'success',
+                        user
+                    });
+                });
             });
-        });
+        }else{
+            userModel.findOne({ article: articleId }).exec((err, user) => {
+                if (err) {
+                    return res.status(404).send({
+                        status: 'error',
+                        message: 'Error al realizar la consulta',
+                        err
+                    });
+                }
+
+                if (!user) {
+                    return res.status(404).send({
+                        status: 'error',
+                        message: 'No esta llegando usuario',
+                        user
+                    });
+                }
+
+                return res.status(200).send({
+                    status: 'success',
+                    user
+                });
+            });
+        }
+
+        
     },
 
     getUserXEmail: (req, res) => {
@@ -329,25 +375,30 @@ const controller = {
 
     //------------------------Actualizar usuario---------------------------------------------------------
     updateUser: (req, res) => {
-
+        
         const userId = req.params.id;
         const params = req.body;
-
+    
         userModel.findOneAndUpdate({ _id: userId }, params, { new: true }, (err, userUpdated) => {
-            if (err || !userUpdated) {
+            if (err) {
                 return res.status(404).send({
                     status: 'error',
                     message: 'No se ha podido actualizar el usuario',
-                    err,
-                    userUpdated
+                    error: err
                 });
-            } else {
+            } else if (!userUpdated) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No devuelve usuario actualizado...'
+                });
+            }else{
                 return res.status(200).send({
                     status: 'success',
                     user: userUpdated
                 });
             }
         });
+
     },
 
     //------------------------Eliminar usuario--------------------------------------------------------
