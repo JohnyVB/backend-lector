@@ -4,8 +4,6 @@ const userModel = require('../models/userModel');
 const chapterModel = require('../models/chapterModel');
 const fs = require('fs');
 const path = require('path');
-const { log } = require("console");
-
 
 const controller = {
 

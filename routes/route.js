@@ -7,6 +7,7 @@ const UserController = require("../controllers/userController");
 const ChapterController = require("../controllers/chapterController");
 const CommentController = require("../controllers/commentController");
 const NotifyController = require("../controllers/notifyController");
+const EmailController = require('../controllers/emailController');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -103,6 +104,9 @@ router.delete("/delete-comment/:id", CommentController.deleteComment);
 router.get("/get-notify/:id", NotifyController.getNotifyPopulate);
 router.post("/save-notify/:id", autentication.ensureAuthenticated, NotifyController.saveNotify);
 router.put("/update-alert-notify/:id", autentication.ensureAuthenticated, NotifyController.updateAlertNotify);
+
+//Rutas de envio de correo
+router.post("/send-email-user/:email", autentication.ensureAuthenticated, EmailController.sendEmailUser);
 
 // Rutas de autenticación y login
 router.post("/save-user", UserController.saveUser); //Guardar usuario
