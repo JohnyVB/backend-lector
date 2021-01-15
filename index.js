@@ -11,7 +11,7 @@ mongoose.set('useFindAndModify', false);
 //------------------mongodb local------------------------------//
 
 
-mongoose.connect("mongodb://localhost:27017/api-rest-lector", {
+/* mongoose.connect("mongodb://localhost:27017/api-rest-lector", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
@@ -24,13 +24,13 @@ mongoose.connect("mongodb://localhost:27017/api-rest-lector", {
        console.log('Servidor corriendo en http://localhost:'+config.PORT);
         
     });
-  });
+  }); */
 
 
 //------------------mongodb atlas produccion------------------------------//
 
 /**/
-/* mongoose.connect("mongodb+srv://root:root3517@cluster0.p9hkj.mongodb.net/api-rest-lector?retryWrites=true&w=majority", {
+mongoose.connect("mongodb+srv://root:root3517@cluster0.p9hkj.mongodb.net/api-rest-lector?retryWrites=true&w=majority", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true
@@ -43,7 +43,7 @@ mongoose.connect("mongodb://localhost:27017/api-rest-lector", {
       console.log('Servidor de BACKEND-LECTOR corriendo en el puerto: ' + config.PORT);
 
     });
-  }); */
+  });
 
   //------------------mongodb atlas test------------------------------//
 
