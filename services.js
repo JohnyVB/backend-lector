@@ -1,10 +1,10 @@
-var jwt = require('jwt-simple');
-var moment = require('moment');
-var config = require('./config');
+const jwt = require('jwt-simple');
+const moment = require('moment');
+const config = require('./config');
 
 exports.createToken = (user) => {
 
-    var payload = {
+    const payload = {
 
         sub: user._id,
         iat: moment().unix(),

@@ -8,6 +8,7 @@ const ChapterController = require("../controllers/chapterController");
 const CommentController = require("../controllers/commentController");
 const NotifyController = require("../controllers/notifyController");
 const EmailController = require('../controllers/emailController');
+const ListController = require('../controllers/listController');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -107,6 +108,10 @@ router.put("/update-alert-notify/:id", autentication.ensureAuthenticated, Notify
 
 //Rutas de envio de correo
 router.post("/send-email-user/:email", autentication.ensureAuthenticated, EmailController.sendEmailUser);
+
+//Rutas de lista
+router.get("/get-list/:id", autentication.ensureAuthenticated, ListController.getList);
+router.post("/save-list/:id", autentication.ensureAuthenticated, ListController.saveList);
 
 // Rutas de autenticación y login
 router.post("/save-user", UserController.saveUser); //Guardar usuario

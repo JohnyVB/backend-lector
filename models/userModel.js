@@ -10,7 +10,8 @@ const UsuarioSchema = new mongoose.Schema({
     //Imagen del usuario/autor
     image: { type: String, default: null},
     //Libros publicados del usuario/autor
-    article: [{ type: mongoose.Schema.Types.ObjectId, ref: "Article", default: "" }],
+    article: [{ type: mongoose.Schema.Types.ObjectId, ref: "Article", default: null }],
+    //Notificaciones
     notify: [{ type: mongoose.Schema.Types.ObjectId, ref: "Notify", default: null }],
     //Email del usuario/autor
     email: { 
@@ -35,6 +36,8 @@ const UsuarioSchema = new mongoose.Schema({
     prefreader: {type: String, default: "paginada"},
     //Fecha de registro del usuario/autor
     regdate: { type: Date, default: Date.now },
+    //Listas
+    list: [{ type: mongoose.Schema.Types.ObjectId, ref: "List", default: null}],
     //Nombre de usuario del usuario/autor
     user: { type: String, unique: true, required: true},
     //Contraseña del usuario/autor

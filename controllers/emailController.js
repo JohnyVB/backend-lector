@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const config = require("../config");
 
 const controller = {
 
@@ -7,12 +8,10 @@ const controller = {
         const params = req.body;
 
         const transpoter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
-            secure: false,
+            service: 'gmail',
             auth: {
-                user: 'davon88@ethereal.email',
-                pass: '3msJybSqqa8FHZRwtc'
+                user: config.EMAIL,
+                pass: config.PASSEMAIL
             }
         });
 

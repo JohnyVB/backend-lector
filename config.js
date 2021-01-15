@@ -11,5 +11,7 @@ module.exports = {
                 }
             ]
         }
-    }
+    },
+    EMAIL: process.env.EMAIL || "readerbookappweb@gmail.com",
+    PASSEMAIL: process.env.PASSEMAIL || "Dragter23joh88."
 }
