@@ -112,6 +112,12 @@ router.post("/send-email-user/:email", autentication.ensureAuthenticated, EmailC
 //Rutas de lista
 router.get("/get-list/:id", autentication.ensureAuthenticated, ListController.getList);
 router.post("/save-list/:id", autentication.ensureAuthenticated, ListController.saveList);
+router.put("/add-book-list/:id", autentication.ensureAuthenticated, ListController.addBookToList);
+router.put("/edit-list/:id", autentication.ensureAuthenticated, ListController.editList);
+router.delete("/delete-list/:id", autentication.ensureAuthenticated, ListController.deleteList);
+router.get("/delete-booklist/:id", autentication.ensureAuthenticated, ListController.deleteBookList);
+router.get("/get-list-article/:id", autentication.ensureAuthenticated, ListController.getListArticle);
+router.put("/update-user-list/:id", autentication.ensureAuthenticated, ListController.updateUserList);
 
 // Rutas de autenticación y login
 router.post("/save-user", UserController.saveUser); //Guardar usuario
