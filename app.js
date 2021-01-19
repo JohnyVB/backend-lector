@@ -3,14 +3,13 @@
 //Cargar modulos de node para crear el servidor
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors');
-const config = require('./config');
 
 //Ejecutar express (http)
 const app = express();
 
+
 //Cargar ficheros rutas
-const route = require("./routes/route");
+const route = require("./route");
 
 //Middlewares
 app.use(bodyParser.urlencoded({ extended: false }));

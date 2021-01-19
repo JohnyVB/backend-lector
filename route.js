@@ -2,17 +2,17 @@
 
 //Imports generales para el funcionamiento
 const express = require("express");
-const ArticleController = require("../controllers/articleController");
-const UserController = require("../controllers/userController");
-const ChapterController = require("../controllers/chapterController");
-const CommentController = require("../controllers/commentController");
-const NotifyController = require("../controllers/notifyController");
-const EmailController = require('../controllers/emailController');
-const ListController = require('../controllers/listController');
+const ArticleController = require("./controllers/articleController");
+const UserController = require("./controllers/userController");
+const ChapterController = require("./controllers/chapterController");
+const CommentController = require("./controllers/commentController");
+const NotifyController = require("./controllers/notifyController");
+const EmailController = require('./controllers/emailController');
+const ListController = require('./controllers/listController');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const autentication = require('../middleware/authentication');
+const autentication = require('./middleware/authentication');
 
 //Configuracion para subir imagen de portada
 let storage1 = multer.diskStorage({
