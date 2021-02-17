@@ -1,8 +1,10 @@
 'use strict'
 
 //Cargar modulos de node para crear el servidor
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+
 
 //Ejecutar express (http)
 const app = express();
