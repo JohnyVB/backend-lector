@@ -1,258 +1,96 @@
-const commentModel = require('../models/CommentsModel');
-const articleModel = require('../models/articleModel');
-const chapterModel = require('../models/chapterModel');
-const validator = require('validator');
+const { request, response } = require('express');
+
+const commentModel = require('../models/commentModel');
 
 const controller = {
 
-    getCommentsPopulate: (req, res) => {
-        const articleId = req.params.id;
-        const reader = req.params.reader;
+    getComments: async (req = request, res = response) => {
 
-        if (!articleId) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'Id del libro no encontrado!!'
-            });
+        const { id, coleccion, inicio = 0, fin = 0 } = req.params;
+
+        const query = {
+            state: true
         }
 
-        if (reader === 'true') {
+        switch (coleccion) {
+            case 'article':
+                query.article = id;
+                break;
 
-            chapterModel.findOne({ _id: articleId }).populate({ path: 'comments', populate: { path: 'userid' }, options: { sort: { date: -1 } } }).exec((err, article) => {
-                if (!article || err) {
-                    return res.status(200).send({
-                        status: 'success',
-                        message: 'No hay comentarios'
-                    });
-                }
+            case 'chapter':
+                query.chapter = id;
+                break;
 
-                return res.status(200).send({
-                    status: 'success',
-                    article
-                });
-            });
-        } else if (reader === 'false') {
-            articleModel.findOne({ _id: articleId }).populate({ path: 'comments', populate: { path: 'userid' }, options: { sort: { date: -1 } } }).exec((err, article) => {
-                if (!article || err) {
-                    return res.status(200).send({
-                        status: 'warn',
-                        message: 'No hay comentarios'
-                    });
-                }
-
-                return res.status(200).send({
-                    status: 'success',
-                    article
-                });
-            });
         }
+
+        const [total, comentarios] = await Promise.all([
+            commentModel.countDocuments(query),
+            commentModel.find(query)
+                .skip(Number(inicio))
+                .limit(Number(fin)),
+        ]);
+
+        res.status(200).send({
+            total,
+            comentarios
+        });
 
     },
 
-    getComments: (req, res) => {
-        commentModel.find({}).exec((err, comments) => {
-            if (err || !comments) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta getComments()'
-                });
-            }
+    saveComment: async (req = request, res = response) => {
 
-            return res.status(200).send({
-                status: 'success',
-                comments
-            });
+        const { id, coleccion } = req.params;
+        const { chapter, article, user, state, date, text } = req.body;
+        const iduser = req.usuario._id;
+
+        const data = {
+            text,
+            user: iduser,
+            article,
+            chapter
+        };
+
+        switch (coleccion) {
+            case 'article':
+                data.article = id;
+                break;
+
+            case 'chapter':
+                data.chapter = id;
+                break;
+
+        }
+
+        const comentario = new commentModel(data);
+        await comentario.save();
+
+        res.status(200).send({
+            comentario
         });
     },
 
-    getComment: (req, res) => {
-        const commentId = req.params.id;
+    putComment: async (req = request, res = response) => {
 
-        if (!commentId) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No hay id para buscar su comentario....'
-            });
-        }
-
-        commentModel.findOne({ _id: commentId }).exec((err, comment) => {
-            if (err || !comment) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta getComment()'
-                });
-            }
-        });
-    },
-
-    saveComment: (req, res) => {
-        const { text, userid } = req.body;
-        const articleId = req.params.id;
-        const reader = req.params.reader;
-
-        if (!articleId || articleId === null || articleId === undefined) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No se encuentra el id del articulo para asignar comentario'
-            });
-        }
-
-        if (!text || !userid) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'Faltan datos del usuario'
-            });
-        }
-
-        try {
-            !validator.isEmpty(text);
-        } catch (err) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'Comentario vacio, por favor ingrese su comentario....',
-                err
-            });
-        }
-
-        const commentmodelo = new commentModel();
-
-        commentmodelo.text = text;
-        commentmodelo.userid = userid;
-
-        commentmodelo.save((err, commentStored) => {
-            if (err || !commentStored) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'error al guardar el comentario...'
-                });
-            }
-
-            let update = {
-                $push: {
-                    comments: commentStored._id
-                }
-            };
-
-
-            if (reader === 'true') {
-                chapterModel.findOneAndUpdate({ _id: articleId }, update, { new: true }, (err, articleStored) => {
-                    if (err || !articleStored) {
-                        return res.status(404).send({
-                            status: 'error',
-                            message: 'Error al actualizar el articulo con el comentario....'
-                        });
-                    }
-
-                    return res.status(200).send({
-                        status: 'success',
-                        message: 'Se ha guardado todo correctamente....'
-                    });
-                });
-            } else if (reader === 'false') {
-                articleModel.findOneAndUpdate({ _id: articleId }, update, { new: true }, (err, articleStored) => {
-                    if (err || !articleStored) {
-                        return res.status(404).send({
-                            status: 'error',
-                            message: 'Error al actualizar el articulo con el comentario....'
-                        });
-                    }
-
-                    return res.status(200).send({
-                        status: 'success',
-                        message: 'Se ha guardado todo correctamente....'
-                    });
-                });
-            }
-
-
-        });
-    },
-
-    updateComment: (req, res) => {
-
+        const { id } = req.params;
         const { text } = req.body;
-        const commentId = req.params.id;
 
-        if (!commentId) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'Id no ingresado'
-            });
-        }
+        const comentario = await commentModel.findByIdAndUpdate(id, { text }, { new: true });
 
-        commentModel.findOneAndUpdate({ _id: commentId }, text, { new: true }, (err, commentUpdated) => {
-            if (err || !commentUpdated) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta UpdateComment()'
-                });
-            }
-
-            return res.status(200).send({
-                status: 'success',
-                commentUpdated
-            });
+        res.status(200).send({
+            comentario
         });
     },
 
-    searchComment: (req, res) => {
-        const { searchComment } = req.params;
+    patchComment: async (req = request, res = response) => {
 
-        if (!searchComment) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No hay parametros a buscar....'
-            });
-        }
+        const { id } = req.params;
+        const query = { state: false };
 
-        commentModel.find({
-            "$or": [
-                { "title": { "$regex": searchComment, "$options": "i" } },
-                { "description": { "$regex": searchComment, "$options": "i" } }
-            ]
-        }).sort([['date', 'descending']]).exec((err, comment) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta searchComment()',
-                    err
-                });
-            }
-
-            if (!comment) {
-                return res.send({
-                    message: 'No se ha encontrado el comentario...'
-                });
-            }
-
-            return res.status(200).send({
-                status: 'success',
-                comment
-            });
+        const comentario = await commentModel.findByIdAndUpdate(id, query, { new: true });
+        
+        res.status(200).send({
+            comentario
         });
-    },
-
-    deleteComment: (req, res) => {
-
-        const commentId = req.params.id;
-
-        commentModel.findOneAndDelete({ _id: commentId }, (err, commentRemoved) => {
-            if (err || !commentRemoved) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error al eliminar el comentario o el comentario ya no existe'
-                });
-            }
-
-            return res.status(200).send({
-                status: 'success',
-                commentRemoved
-            });
-        });
-    },
-
-    error: (req, res) => {
-        return res.status(200).send(false);
     }
 };
 

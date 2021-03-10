@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 
 const UsuarioSchema = new mongoose.Schema({
 
@@ -7,43 +6,30 @@ const UsuarioSchema = new mongoose.Schema({
     name: String,
     //Apellidos del usuario/autor
     lastname: String,
-    //Imagen del usuario/autor
-    image: { type: String, default: null},
-    //Libros publicados del usuario/autor
-    article: [{ type: mongoose.Schema.Types.ObjectId, ref: "Article", default: null }],
-    //Notificaciones
-    notify: [{ type: mongoose.Schema.Types.ObjectId, ref: "Notify", default: null }],
     //Email del usuario/autor
-    email: { 
-        type: String, 
-        unique: true, 
+    email: {
+        type: String,
+        unique: true,
         required: true,
         lowercase: true,
-        validate: (value) => {
-            if (!validator.isEmail(value)) {
-                return status(400).send({
-                    status: "error",
-                    message: "Direccion email incorrecto"
-                });
-            }
-        } 
     },
-    //token
-    token: {type: String, default: ""},
-    //Rol de usuario
-    role: {type: String, default: "user"},
-    //Preferencia de lectura opciones: paginada | cascada
-    prefreader: {type: String, default: "paginada"},
-    //Fecha de registro del usuario/autor
-    regdate: { type: Date, default: Date.now },
-    //Listas
-    list: [{ type: mongoose.Schema.Types.ObjectId, ref: "List", default: null}],
-    //Nombre de usuario del usuario/autor
-    user: { type: String, unique: true, required: true},
     //Contraseña del usuario/autor
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    //Imagen del usuario/autor
+    image: { type: String, default: null},
+    //Estado
+    state: { type: Boolean, default: true },
+    //Rol de usuario
+    role: { type: String, default: "user-role" },
+    //Preferencia de lectura opciones: paginada | cascada
+    reader: { type: Boolean, default: false },
+    //Fecha de registro del usuario/autor
+    date: { type: Date, default: Date.now }
 });
 
-
+UsuarioSchema.methods.toJSON = function(){
+    const { __v, password, _id, ...usuario } = this.toObject();
+    return usuario;
+}
 
 module.exports = mongoose.model('User', UsuarioSchema);

@@ -5,15 +5,19 @@ const mongoose = require('mongoose');
 const ChapterSchema = new mongoose.Schema({
 
     //Numero del capitulo
-    numcap: { type: Number },
+    number: { type: Number },
     //Titulo del capitulo
-    titlecap: { type: String },
+    title: { type: String },
+    //Estado
+    state: { type: Boolean, default: true },
     //Fecha en que se publica el capitulo
-    datechapter: { type: Date, default: Date.now },
-    //Comentarios
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment", default: null }],
+    date: { type: Date, default: Date.now },
     //Archivo con las imagenes del capitulo en pdf
-    imgpage: { type: String, default: "" }
+    image: { type: String, default: null },
+    //Libro al que pertenece
+    article: { type: mongoose.Schema.Types.ObjectId, ref: "Article", require: true },
+    //Usuario al que pertenece
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", require: true }
 
 });
 

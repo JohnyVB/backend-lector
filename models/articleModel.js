@@ -4,25 +4,22 @@ const mongoose = require('mongoose');
 
 const ArticleSchema = new mongoose.Schema({
   //titulo del libro
-  title: String,
+  title: { type: String },
   //descripcion del libro
-  description: String,
+  description: { type: String, default: 'Por favor complete la descripción del libro'},
   //fecha de publicacion
   date: { type: Date, default: Date.now },
   //Imagen de portada
-  image: { type: String, default: "" },
-  //Tipo de libro
-  type: String,
+  image: { type: String, default: null },
   //Generos del libro
   genders: { type: Array, default: [] },
   //Estado del libro
-  state: String,
+  progress: { type: String, default: 'publicandose' },
+  //Estado true or false
+  state: { type: Boolean, default: true },
   //Autor
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  //Comentarios del capitulo
-  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment", default: null}],
-  //capitulos del libro
-  chapter: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chapter", default: "" }],
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", require: true },
+  
 });
 
 module.exports = mongoose.model("Article", ArticleSchema);
