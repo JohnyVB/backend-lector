@@ -1,13 +1,13 @@
-const fs = require('fs');
 const { response, request } = require('express');
 const bcrypt = require('bcryptjs');
-const path = require('path');
+const jwt = require('jsonwebtoken');
+
 
 const userModel = require('../models/userModel');
 
 
 const controller = {
-    getUser: async(req = request, res = response) => {
+    getUser: async (req = request, res = response) => {
 
         const { id } = req.params;
 
@@ -18,12 +18,38 @@ const controller = {
         });
     },
 
+    getUserPorToken: async (req = request, res = response) => {
+
+        const { token } = req.params;
+
+        try {
+            const { uid } = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
+
+            if (!uid) {
+                return res.status(404).send({
+                    msg: 'No existe token con el id'
+                });
+            }
+
+            const usuario = await userModel.findById(uid);
+
+            res.status(200).send({
+                usuario
+            });
+        } catch (error) {
+            res.status(500).send({
+                error
+            });
+        }
+
+    },
+
     getUsers: async (req = request, res = response) => {
 
-        const { fin = 10, inicio = 0} = req.query;
+        const { fin = 10, inicio = 0 } = req.query;
         const query = { state: true };
 
-        const [ total, usuarios ] = await Promise.all([
+        const [total, usuarios] = await Promise.all([
             userModel.countDocuments(query),
             userModel.find(query)
                 .skip(Number(inicio))
@@ -61,7 +87,7 @@ const controller = {
             user.password = bcrypt.hashSync(password, salts);
         }
 
-        const usuario = await userModel.findByIdAndUpdate(id, user, { new: true});
+        const usuario = await userModel.findByIdAndUpdate(id, user, { new: true });
 
         res.status(200).send({
             usuario
@@ -70,7 +96,7 @@ const controller = {
 
     patchUser: async (req = request, res = response) => {
         const { id } = req.params;
-        const usuario = await userModel.findByIdAndUpdate(id, { state: false}, { new: true });
+        const usuario = await userModel.findByIdAndUpdate(id, { state: false }, { new: true });
 
         res.status(200).send({
             usuario
