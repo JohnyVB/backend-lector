@@ -6,6 +6,8 @@ const UsuarioSchema = new mongoose.Schema({
     name: String,
     //Apellidos del usuario/autor
     lastname: String,
+    //Biografia del usuario
+    biography: { type: String, default: 'Acerca de mi' },
     //Email del usuario/autor
     email: {
         type: String,
@@ -28,7 +30,7 @@ const UsuarioSchema = new mongoose.Schema({
 });
 
 UsuarioSchema.methods.toJSON = function(){
-    const { __v, password, _id, ...usuario } = this.toObject();
+    const { __v, password, ...usuario } = this.toObject();
     return usuario;
 }
 

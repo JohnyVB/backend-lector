@@ -37,7 +37,7 @@ const validarPropiedad = async (req = request, res = response, next) => {
 
         if (comentario.user.toString() !== iduser.toString()) {
             return res.status(404).send({
-                msg: 'Tienes que ser el propietario del capitulo para realizar esta acción'
+                msg: 'Tienes que ser el propietario del comentario para realizar esta acción'
             });
         }
 

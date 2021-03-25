@@ -4,7 +4,7 @@ const { check } = require('express-validator');
 const { validarCampos } = require('../middleware/validarCampos');
 const { validarJWT } = require('../middleware/validarJWT');
 const { validarPropiedad } = require('../middleware/validarPropiedad');
-const { getChapter, getChapters, saveChapter, putChapter, patchChapter } = require('../controllers/chapterController');
+const { getChapter, getChaptersPorUnArticle, getChapters, saveChapter, putChapter, patchChapter } = require('../controllers/chapterController');
 const { existeArticuloPorId, existeCapituloPorId } = require('../helpers/db-validators')
 
 
@@ -16,12 +16,14 @@ router.get('/:id', [
     validarCampos
 ], getChapter)
 
-router.get('/article/:id', [
+router.get('/art/:id/:order', [
     check('id', 'El ID es obligatorio').not().isEmpty(),
     check('id', 'El ID debe ser valido').isMongoId(),
     check('id').custom(existeArticuloPorId),
     validarCampos
-], getChapters);
+], getChaptersPorUnArticle);
+
+router.get('/', getChapters);
 
 router.post('/:id', [
     validarJWT,

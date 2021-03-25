@@ -8,7 +8,6 @@ const controller = {
 
     login: async(req = request, res = response) => {
         const { email, password } = req.body;
-
         try {
 
             const usuario =  await userModel.findOne({email});

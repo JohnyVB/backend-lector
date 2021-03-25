@@ -37,7 +37,6 @@ router.put('/:id', [
     validarCampos
 ], putUser);
 
-
 router.patch('/:id',[
     validarJWT,
     esAdminRole,
@@ -45,7 +44,5 @@ router.patch('/:id',[
     check('id').custom(existeUsuarioPorId),
     validarCampos
 ], patchUser);
-
-
 
 module.exports = router;

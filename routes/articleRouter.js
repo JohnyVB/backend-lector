@@ -15,7 +15,7 @@ router.get('/:id', [
     validarCampos
 ], getArticle);
 
-router.get('/', getArticles);
+router.get('/populate/:populate', getArticles);
 
 router.get('/user/:id', [
     check('id', 'El ID es obligatorio').not().isEmpty(),
@@ -26,8 +26,9 @@ router.get('/user/:id', [
 router.post('/', [
     validarJWT,
     check('title', 'El titulo es obligatorio').not().isEmpty(),
+    check('type', 'El tipo del libro es obligatorio').not().isEmpty(),
+    check('progress', 'El estado del libro es obligatorio').not().isEmpty(),
     check('genders', 'Ingrese por lo menos 1 genero').not().isEmpty(),
-    check('id').custom(existeArticuloPorId),
     validarCampos
 ], saveArticle);
 

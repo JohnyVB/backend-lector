@@ -6,10 +6,14 @@ const controller = {
 
     getComments: async (req = request, res = response) => {
 
-        const { id, coleccion, inicio = 0, fin = 0 } = req.params;
+        const { id, coleccion, order, inicio = 0, fin = 10 } = req.params;
 
         const query = {
             state: true
+        }
+
+        const queryOrder = {
+            date: Number(order)
         }
 
         switch (coleccion) {
@@ -26,6 +30,8 @@ const controller = {
         const [total, comentarios] = await Promise.all([
             commentModel.countDocuments(query),
             commentModel.find(query)
+                .sort(queryOrder)
+                .populate('user')
                 .skip(Number(inicio))
                 .limit(Number(fin)),
         ]);

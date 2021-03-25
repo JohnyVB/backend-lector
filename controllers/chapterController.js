@@ -2,33 +2,59 @@ const { request, response } = require('express');
 
 const chapterModel = require('../models/chapterModel');
 
+
 const controller = {
 
     getChapter: async (req = request, res = response) => {
 
         const { id } = req.params;
-        const capitulo = await chapterModel.findById(id).populate('article');
+        const capitulo = await chapterModel.findById(id)
+                            .populate('article')
+                            .populate('user');
 
         res.status(200).send({
             capitulo
         });
     },
 
-    getChapters: async (req = request, res = response) => {
+    getChaptersPorUnArticle: async (req = request, res = response) => {
 
-        const { id, inicio = 0, fin = 10 } = req.params;
+        const { id, order, inicio = 0, fin = 10 } = req.params;
         const query = { state: true, article: id };
+        const queryOrder = {
+            date: Number(order)
+        }
 
-        const [ total, chapters ] = await Promise.all([
+        const [total, capitulo ] = await Promise.all([
             chapterModel.countDocuments(query),
             chapterModel.find(query)
+                .sort(queryOrder)
                 .skip(Number(inicio))
                 .limit(Number(fin))
         ]);
 
         res.status(200).send({
             total,
-            chapters
+            capitulo
+        });
+    },
+
+    getChapters: async (req = request, res = response) => {
+
+        const { inicio = 0, fin = 10 } = req.params;
+        const query = { state: true };
+
+        const [total, capitulo] = await Promise.all([
+            chapterModel.countDocuments(query),
+            chapterModel.find(query)
+                .populate('article')
+                .skip(Number(inicio))
+                .limit(Number(fin))
+        ]);
+
+        res.status(200).send({
+            total,
+            capitulo
         });
     },
 

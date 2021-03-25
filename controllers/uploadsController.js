@@ -1,4 +1,3 @@
-const path = require('path');
 const cloudinary = require('cloudinary').v2;
 cloudinary.config(process.env.CLOUDINARY_URL);
 const { response, request } = require('express');
@@ -48,7 +47,7 @@ const controller = {
             const nombreArr = modelo.image.split('/');
             const nombreArchivo = nombreArr[nombreArr.length - 1];
             const [public_id] = nombreArchivo.split('.');
-            cloudinary.uploader.destroy(public_id);
+            cloudinary.uploader.destroy('backend-lector/'+ coleccion + '/' + public_id);
         }
 
         const { tempFilePath } = req.files.archivo;
