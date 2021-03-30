@@ -41,15 +41,16 @@ const controller = {
 
     getChapters: async (req = request, res = response) => {
 
-        const { inicio = 0, fin = 10 } = req.params;
+        const { inicio = 0, cantidad = 10 } = req.params;
         const query = { state: true };
 
         const [total, capitulo] = await Promise.all([
             chapterModel.countDocuments(query),
             chapterModel.find(query)
                 .populate('article')
+                .sort({ date: -1})
                 .skip(Number(inicio))
-                .limit(Number(fin))
+                .limit(Number(cantidad))
         ]);
 
         res.status(200).send({

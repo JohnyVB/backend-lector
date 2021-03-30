@@ -2,6 +2,7 @@ const userModel = require('../models/userModel');
 const articleModel = require('../models/articleModel');
 const chapterModel = require('../models/chapterModel');
 const commentModel = require('../models/commentModel');
+const listModel = require('../models/listModel');
 
 
 const emailExiste = async (email = '') => {
@@ -45,6 +46,13 @@ const existeComentarioPorId = async (id = '') => {
     }
 }
 
+const existeListaPorId = async (id = '') =>{
+    const existeLista = await listModel.findById(id);
+    if (!existeLista) {
+        throw new Error('La lista con ID: ' + id + ' no existe');
+    }
+}
+
 const coleccionesPermitidas = async (coleccion = '', colecciones = []) => {
     const incluida = await colecciones.includes(coleccion);
     if (!incluida) {
@@ -59,5 +67,6 @@ module.exports = {
     existeArticuloPorId,
     existeCapituloPorId,
     existeComentarioPorId,
+    existeListaPorId,
     coleccionesPermitidas
 }

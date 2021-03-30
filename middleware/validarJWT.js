@@ -18,7 +18,6 @@ const validarJWT = async (req = request, res = response, next) => {
 
         const { uid } = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
 
-        
         const usuario = await userModel.findById(uid);
 
         if (!usuario) {
@@ -37,8 +36,7 @@ const validarJWT = async (req = request, res = response, next) => {
         next();
 
     } catch (error) {
-
-        console.log(error);
+        
         res.status(401).json({
             msg: 'Token no válido'
         })

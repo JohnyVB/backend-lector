@@ -15,7 +15,8 @@ router.get('/:id', [
     validarCampos
 ], getArticle);
 
-router.get('/populate/:populate', getArticles);
+
+router.get('/count/:cantidad', getArticles);
 
 router.get('/user/:id', [
     check('id', 'El ID es obligatorio').not().isEmpty(),

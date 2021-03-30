@@ -1,326 +1,119 @@
+const { request, response } = require('express');
+
 const userModel = require('../models/userModel');
 const listModel = require('../models/listModel');
 const notifyModel = require('../models/notifyModel');
+
+
 const controller = {
 
-    getList: (req, res) => {
-        const userid = req.params.id;
+    getLists: async (req = request, res = response) => {
+        const { id } = req.params;
 
-        if (!userid) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No hay id de usuario'
-            });
-        }
+        const listas = await listModel.find({ user: id, state: true }).populate('article');
 
-        userModel.findOne({ _id: userid }).populate({ path: 'list', options: { populate: 'articleid' } }).exec((err, user) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta'
-                });
-            }
-
-            if (!user) {
-                return res.status(200).send({
-                    status: 'success',
-                    message: 'No hay lista',
-                    user
-                });
-            }
-
-            return res.status(200).send({
-                status: 'success',
-                user
-            });
+        res.status(200).send({
+            listas
         });
     },
 
-    saveList: (req, res) => {
-        const userid = req.params.id;
-        const params = req.body;
+    getListsPorArticle: async (req = request, res = response) => {
+        const { id, article } = req.params;
 
-        if (!userid) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No hay id de usuario'
-            });
-        }
+        const lista = await listModel.findOne({ user: id, article, state: true });
 
-        if (!params) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'Faltan datos por enviar'
-            });
-        }
-
-        const listM = new listModel();
-        listM.name = params.name;
-
-        listM.save((err, listSaved) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error al guardar la lista',
-                    err
-                });
-            }
-
-            if (!listSaved) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'No devuelve la lista'
-                });
-            }
-
-            let update = {
-                $push: {
-                    list: listSaved._id
-                }
-            }
-
-            userModel.findOneAndUpdate({ _id: userid }, update, { new: true }, (err, userUpdated) => {
-                if (err) {
-                    return res.status(404).send({
-                        status: 'error',
-                        message: 'Error al guardar la lista en el usuario',
-                        err
-                    });
-                }
-
-                if (!userUpdated) {
-                    return res.status(404).send({
-                        status: 'error',
-                        message: 'No devuelve el usuario actualizado con la lista'
-                    });
-                }
-
-                return res.status(200).send({
-                    status: 'success',
-                    userUpdated,
-                    listSaved
-                });
-            });
-
+        res.status(200).send({
+            lista
         });
+    },
+
+    saveList: async (req = request, res = response) => {
+        const { date, state, user, article, name } = req.body;
+
+        const data = {
+            name,
+            user: req.usuario._id
+        }
+
+        try {
+            const lista = new listModel(data);
+            await lista.save();
+
+            res.status(200).send({
+                lista
+            });
+        } catch (error) {
+            res.send({
+                error
+            });
+        }
 
     },
 
-    addBookToList: (req, res) => {
-        const listid = req.params.id;
-        const params = req.body;
-        if (!listid) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No llega el id de la lista'
-            });
-        }
-
-        if (!params) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No llega los parametros a ingresar'
-            });
-        }
+    addBookToList: async (req = request, res = response) => {
+        const { id } = req.params;
+        const { article } = req.body;
+        
         let update = {
             $push: {
-                articleid: params.articleid
+                article
             }
         }
-        listModel.findOneAndUpdate({ _id: listid }, update, { new: true }, (err, listUpdated) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta'
-                });
-            }
 
-            if (!listUpdated) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'No devuelve la lista actualizada'
-                });
-            }
+        let lista = await listModel.findOne({ _id: id });
 
-            return res.status(200).send({
-                status: 'success',
-                listUpdated
+        if (lista.article.includes(article)) {
+            return res.status(401).send({
+                msg: `El articulo: ${ article } ya se encuentra en esta lista...`
             });
+        }
+
+        lista = await listModel.findOneAndUpdate({ _id: id }, update, { new: true });
+
+        res.status(200).send({
+            lista
         });
     },
 
-    editList: (req, res) => {
-        const listid = req.params.id;
-        const params = req.body;
+    editList: async (req = request, res = response) => {
+        const { id } = req.params;
+        const { name } = req.body;
 
-        if (!params) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No llega los parametros'
-            });
-        }
 
-        if (!listid) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No llega el id de la lista'
-            });
-        }
+        const lista = await listModel.findOneAndUpdate({ _id: id }, { name }, { new: true });
 
-        listModel.findOneAndUpdate({ _id: listid }, params, { new: true }, (err, listUpdated) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta'
-                });
-            }
-
-            if (!listUpdated) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'no devuelve la lista actualizada'
-                });
-            }
-
-            return res.status(200).send({
-                status: 'success',
-                listUpdated
-            });
+        res.status(200).send({
+            lista
         });
     },
 
-    deleteList: (req, res) => {
-        const listid = req.params.id;
+    deleteList: async (req = request, res = response) => {
 
-        if (!listid) {
-            return res.status(404).send({
-                status: 'error',
-                message: 'No llega el id de la lista'
-            });
-        }
+        const { id } = req.params;
+        const query = { state: false }
+        
+        const lista = await listModel.findByIdAndUpdate(id, query, { new: true});
 
-        listModel.findOneAndDelete({ _id: listid }, (err, listDeleted) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta'
-                }); 
-            }
-
-            if (!listDeleted) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'No devuelve la lista eliminada'
-                }); 
-            } 
-            
-            return res.status(200).send({
-                status: 'success',
-                listDeleted
-            }); 
+        res.status(200).send({
+            lista
         });
     },
 
-    deleteBookList: (req, res) => {
-        const articleid = req.params.id;
+    deleteBookList: async(req = request, res = response) => {
+        const { id } = req.params;
+        const { article } = req.body;
 
         let updated = {
             $pull: {
-                articleid: articleid
+                article
             }
         }
 
-        listModel.findOneAndUpdate({ articleid: articleid }, updated, { new: true }, (err, listUpdated) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta'
-                }); 
-            }
+        const lista = await listModel.findOneAndUpdate({ _id: id }, updated, { new: true });
 
-            if (!listUpdated) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'No devuelve la lista actualizada'
-                });
-            }
-
-            return res.status(200).send({
-                status: 'success',
-                listUpdated
-            });
+        res.status(200).send({
+            lista
         });
-    },
-
-    getListArticle: (req, res) => {
-        const articleid = req.params.id;
-
-        listModel.find({ articleid: articleid}).exec( (err, list) => {
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error en la consulta'
-                });
-            }
-
-            if (!list) {
-               return res.status(200).send({
-                    status: 'success',
-                    message: 'Lista vacia'
-               }); 
-            }
-
-            return res.status(200).send({
-                status: 'success',
-                list
-            });
-        });
-    },
-
-    updateUserList: (req, res) => {
-        const listid = req.params.id;
-        const params = req.body;
-
-        let notifyM = new notifyModel()
-        notifyM.userid = params.userid;
-        notifyM.username = params.username;
-        notifyM.articleid = params.articleid;
-        notifyM.articletitle = params.articletitle;
-        notifyM.message = params.message;
-        notifyM.chapter = false;
-
-        notifyM.save((err, notifySaved) =>{
-            if (err) {
-                return res.status(404).send({
-                    status: 'error',
-                    message: 'Error al guardar la notificacion'
-                });
-            }
-            let update = {
-                $push: {
-                    notify: notifySaved._id
-                }
-
-            }
-            userModel.findOneAndUpdate({ list: listid }, update, { new: true }, (err, userUpdated) => {
-                if (err) {
-                    return res.status(404).send({
-                        status: 'error',
-                        message: 'Error en la consulta para añadir las notificaciones a los usuarios'
-                    });
-                }
-
-                return res.status(200).send({
-                    status: 'success',
-                    notifySaved,
-                    userUpdated
-                });
-            });
-
-        });
-
-
-        
     }
 
 };

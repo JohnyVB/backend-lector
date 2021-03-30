@@ -23,7 +23,7 @@ router.get('/art/:id/:order', [
     validarCampos
 ], getChaptersPorUnArticle);
 
-router.get('/', getChapters);
+router.get('/count/:cantidad', getChapters);
 
 router.post('/:id', [
     validarJWT,

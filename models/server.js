@@ -16,7 +16,9 @@ class Server {
             uploads: '/api/uploads',
             articles: '/api/articles',
             chapters: '/api/chapters',
-            comments: '/api/comments'
+            comments: '/api/comments',
+            searchs: '/api/searchs',
+            list: '/api/lists'
         }
 
 
@@ -63,6 +65,8 @@ class Server {
         this.app.use(this.path.articles, require('../routes/articleRouter'));
         this.app.use(this.path.chapters, require('../routes/chapterRouter'));
         this.app.use(this.path.comments, require('../routes/commentRouter'));
+        this.app.use(this.path.searchs, require('../routes/searchRouter'));
+        this.app.use(this.path.list, require('../routes/listRouter'));
     }
 
     listen() {

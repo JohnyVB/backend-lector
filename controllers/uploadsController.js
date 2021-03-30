@@ -50,6 +50,8 @@ const controller = {
             cloudinary.uploader.destroy('backend-lector/'+ coleccion + '/' + public_id);
         }
 
+        
+
         const { tempFilePath } = req.files.archivo;
         const { secure_url } = await cloudinary.uploader.upload(tempFilePath, { folder: 'backend-lector/' + coleccion});
 

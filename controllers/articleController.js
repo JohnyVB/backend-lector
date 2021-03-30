@@ -19,16 +19,16 @@ const controller = {
 
   getArticles: async (req = request, res = response) => {
 
-    const { populate, fin = 10, inicio = 0 } = req.params;
+    const { cantidad = 10, inicio = 0 } = req.params;
     const query = { state: true };
 
     const [total, articulos] = await Promise.all([
       articleModel.countDocuments(query),
       articleModel.find(query)
         .sort({ date: -1 })
-        .populate(populate)
+        .populate('user')
         .skip(Number(inicio))
-        .limit(Number(fin))
+        .limit(Number(cantidad))
     ]);
 
     res.status(200).send({
@@ -101,7 +101,7 @@ const controller = {
       const nombreArr = articulo.image.split('/');
       const nombreArchivo = nombreArr[nombreArr.length - 1];
       const [public_id] = nombreArchivo.split('.');
-      const result = await cloudinary.uploader.destroy('backend-lector/articles/'+public_id);
+      const result = await cloudinary.uploader.destroy('backend-lector/articles/' + public_id);
       articulo.image = null;
       articulo.state = false;
       await articulo.save();
@@ -110,7 +110,7 @@ const controller = {
         articulo,
         result
       });
-    }else{
+    } else {
 
       const articulo = await articleModel.findByIdAndUpdate(id, query, { new: true });
       res.status(200).send({
