@@ -1,6 +1,11 @@
 const { request, response } = require('express');
 
 const commentModel = require('../models/commentModel');
+const articleModel = require('../models/articleModel');
+const chapterModel = require('../models/chapterModel');
+const notifyModel = require('../models/notifyModel');
+
+const { sendEmail } = require('../helpers/sendEmail');
 
 const controller = {
 
@@ -47,22 +52,25 @@ const controller = {
 
         const { id, coleccion } = req.params;
         const { chapter, article, user, state, date, text } = req.body;
-        const iduser = req.usuario._id;
 
         const data = {
             text,
-            user: iduser,
+            user: req.usuario._id,
             article,
             chapter
         };
 
+        let model;
+
         switch (coleccion) {
             case 'article':
                 data.article = id;
+                model = await articleModel.findById(id).populate('user');
                 break;
 
             case 'chapter':
                 data.chapter = id;
+                model = await chapterModel.findById(id).populate('user');
                 break;
 
         }
@@ -70,8 +78,35 @@ const controller = {
         const comentario = new commentModel(data);
         await comentario.save();
 
+        const dataNotify = {
+            user: model.user._id,
+            userPost: req.usuario._id,
+            data: {
+
+                title: (coleccion === 'article') 
+                        ? 'ha publicado en el libro: ' 
+                        : 'ha publicado en el capitulo',
+
+                article: (coleccion === 'article')
+                        ? id
+                        : null,
+
+                chapter: (coleccion === 'chapter')
+                        ? id
+                        : null
+
+            }
+        }
+
+        const notificacion = new notifyModel(dataNotify);
+        await notificacion.save();
+
+        const enviarEmail = await sendEmail(model.user.email, req.usuario.name, dataNotify.data.title ,model.title );
+
         res.status(200).send({
-            comentario
+            comentario,
+            notificacion,
+            enviarEmail
         });
     },
 

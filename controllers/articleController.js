@@ -25,8 +25,9 @@ const controller = {
     const [total, articulos] = await Promise.all([
       articleModel.countDocuments(query),
       articleModel.find(query)
-        .sort({ date: -1 })
         .populate('user')
+        .populate({ path: 'chapter', options: { sort: { date: -1 }, limit: 6 }})
+        .sort({chapter: -1 })
         .skip(Number(inicio))
         .limit(Number(cantidad))
     ]);

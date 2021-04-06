@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "nodemon app.js"
+    "start:dev": "nodemon app.js"
   },
   "author": "Johny Villegas",
   "license": "MIT",
@@ -20,7 +20,8 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.26.0",
     "mongoose": "^5.9.17",
-    "nodemailer": "^6.4.17"
+    "nodemailer": "^6.4.17",
+    "socket.io": "^4.0.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

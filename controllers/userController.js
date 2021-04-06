@@ -44,6 +44,16 @@ const controller = {
 
     },
 
+    getUserXarticle: async (req = request, res = response) => {
+        const { id } = req.params;
+
+        const usuario = await userModel.findOne({ article: id});
+
+        res.status(200).send({
+            usuario
+        });
+    },
+
     getUsers: async (req = request, res = response) => {
 
         const { fin = 10, inicio = 0 } = req.query;

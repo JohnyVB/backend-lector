@@ -1,6 +1,7 @@
 const { request, response } = require('express');
 
 const chapterModel = require('../models/chapterModel');
+const articleModel = require('../models/articleModel');
 
 
 const controller = {
@@ -73,8 +74,16 @@ const controller = {
         const capitulo = new chapterModel(data);
         await capitulo.save();
 
+        const update = {
+            $push: {
+                chapter: capitulo._id
+            }
+        }
+        const articulo = await articleModel.findOneAndUpdate({ _id: id}, update, { new: true });
+
         res.status(200).send({
-            capitulo
+            capitulo,
+            articulo
         });
     },
 
@@ -98,11 +107,18 @@ const controller = {
 
         const { id } = req.params;
         const query = { state: false };
+        const update = {
+            $pull: {
+                chapter: id
+            }
+        }
 
         const capitulo = await chapterModel.findByIdAndUpdate(id, query, { new: true });
+        const articulo = await articleModel.findOneAndUpdate({chapter: id}, update, { new: true });
 
         res.status(200).send({
-            capitulo
+            capitulo,
+            articulo
         });
     }
 

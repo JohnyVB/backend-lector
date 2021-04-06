@@ -21,6 +21,8 @@ const ArticleSchema = new mongoose.Schema({
   state: { type: Boolean, default: true },
   //Autor
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", require: true },
+  //Capitulos
+  chapter: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chapter", default: null }]
   
 });
 

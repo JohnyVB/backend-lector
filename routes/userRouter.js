@@ -4,7 +4,7 @@ const { check } = require('express-validator');
 const { validarCampos } = require('../middleware/validarCampos');
 const { validarJWT, esAdminRole } = require('../middleware/validarJWT');
 const { emailExiste, existeUsuarioPorId } = require('../helpers/db-validators');
-const { getUser, getUserPorToken, getUsers, saveUser, putUser, patchUser } = require('../controllers/userController');
+const { getUser, getUserPorToken, getUserXarticle, getUsers, saveUser, putUser, patchUser } = require('../controllers/userController');
 
 const router = Router();
 
@@ -21,6 +21,8 @@ router.get('/key/:token', [
 ], getUserPorToken);
 
 router.get('/', getUsers);
+
+router.get('/article/:id', getUserXarticle)
 
 router.post('/', [
     check('name', 'El nombre es obligatorio').not().isEmpty(),
