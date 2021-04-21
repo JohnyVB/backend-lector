@@ -11,7 +11,7 @@ const controller = {
             notifyModel.find({ user: id })
                 .sort({ date: -1 })
                 .populate(['userPost', 'data.article', 'data.chapter']),
-            notifyModel.countDocuments({ alert: true })
+            notifyModel.countDocuments({ user: id, alert: true })
         ])
 
         res.status(200).send({
