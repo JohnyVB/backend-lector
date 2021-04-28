@@ -10,7 +10,14 @@ class Server {
         this.app = express();
         this.port = process.env.PORT;
         this.server = require('http').createServer(this.app);
-        this.io = require('socket.io')(this.server);
+        this.io = require('socket.io')(this.server, {
+            cors: {
+                origin: "*",
+                methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+            }
+        });
+
+        /*  */
 
         this.path = {
             auth: '/api/auth',
@@ -33,6 +40,9 @@ class Server {
 
         // Rutas de mi aplicación
         this.routes();
+
+        // Sockets
+        this.socket();
     }
 
     async conectarDB() {
@@ -71,6 +81,15 @@ class Server {
         this.app.use(this.path.searchs, require('../routes/searchRouter'));
         this.app.use(this.path.lists, require('../routes/listRouter'));
         this.app.use(this.path.notifys, require('../routes/notifyRouter'));
+    }
+
+    socket(){
+        this.io.on('connection', socket => {
+            console.log('Cliente conectado', socket.id);
+            this.io.on('testConnection', msg => {
+                console.log(msg);
+            })
+        });
     }
 
     listen() {
