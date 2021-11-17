@@ -13,7 +13,7 @@ router.post('/login',[
     validarCampos
 ], login);
 
-router.get('/renewtoken'[
+router.get('/renewtoken',[
     validarJWT
 ], renewToken);
 
