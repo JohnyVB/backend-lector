@@ -43,6 +43,21 @@ const controller = {
                 error
             });
         }
+    },
+    
+    renewToken: async(req = request, res = response) => {
+        try {
+            const token = await generarJWT(req.usuario._id);
+            res.status(200).send({
+                usuario: req.usuario,
+                token
+            });
+        } catch (error) {
+            return res.status(500).send({
+                msg: 'Algo salio mal....',
+                error
+            });
+        }
     }
 
 };
