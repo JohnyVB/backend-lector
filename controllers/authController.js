@@ -47,20 +47,21 @@ const controller = {
     
     renewToken: async(req = request, res = response) => {
 
-        const id = req.usuario._id;
-
-        if (!id || id === '') {
-            return res.status(401).send({
-                msg: 'Error al extraer el id del token'
-            });
-        }
-
         try {
+
+            const id = req.usuario._id;
+
+            if (!id || id === '') {
+                return res.status(401).send({
+                    msg: 'Error al extraer el id del token'
+                });
+            }
             const token = await generarJWT(req.usuario._id);
             res.status(200).send({
                 usuario: req.usuario,
                 token
             });
+            
         } catch (error) {
             return res.status(500).send({
                 msg: 'Algo salio mal....',

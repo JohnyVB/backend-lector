@@ -6,40 +6,54 @@ const userModel = require('../models/userModel');
 
 const validarJWT = async (req = request, res = response, next) => {
 
-    const token = req.header('x-token');
-
-    if (!token) {
-        return res.status(401).json({
-            msg: 'No hay token en la petición'
-        });
-    }
-
     try {
 
-        const { uid } = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
+        const token = req.header('x-token');
 
-        const usuario = await userModel.findById(uid);
-
-        if (!usuario) {
+        if (!token) {
             return res.status(401).json({
-                msg: 'usuario no existe DB'
-            })
+                msg: 'No hay token en la petición'
+            });
         }
 
-        if (!usuario.state) {
-            return res.status(401).json({
-                msg: 'usuario no existe DB'
-            })
-        }
+        jwt.verify(token, process.env.SECRETORPRIVATEKEY, async(err) => {
+            if(err.message === 'jwt expired') {
+                return res.status(401).send({
+                    msg: err.message
+                });
+            }
 
-        req.usuario = usuario;
-        next();
+            if (err.message === 'invalid token') {
+                return res.status(401).json({
+                    msg: 'Token no válido'
+                });
+            }
+
+            const {uid} = jwt.decode(token);
+
+            const usuario = await userModel.findById(uid);
+
+            if (!usuario) {
+                return res.status(401).json({
+                    msg: 'usuario no existe DB'
+                });
+            }
+
+            if (!usuario.state) {
+                return res.status(401).json({
+                    msg: 'usuario deshabilitado'
+                });
+            }
+
+            req.usuario = usuario;
+            next();
+        });
 
     } catch (error) {
         
-        res.status(401).json({
-            msg: 'Token no válido'
-        })
+        return res.status(401).json({
+            msg: 'Error al procesar el token'
+        });
     }
 
 }
