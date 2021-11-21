@@ -17,15 +17,15 @@ const validarJWT = async (req = request, res = response, next) => {
         }
 
         jwt.verify(token, process.env.SECRETORPRIVATEKEY, async(err) => {
-            if(err.message === 'jwt expired') {
+            if(err?.message === 'jwt expired') {
                 return res.status(401).send({
-                    msg: err.message
+                    msg: err?.message
                 });
             }
 
-            if (err.message === 'invalid token') {
+            if (err?.message === 'invalid token') {
                 return res.status(401).json({
-                    msg: 'Token no válido'
+                    msg: err?.message
                 });
             }
 
