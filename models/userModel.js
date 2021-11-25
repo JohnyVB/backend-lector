@@ -20,11 +20,13 @@ const UsuarioSchema = new mongoose.Schema({
     //Imagen del usuario/autor
     image: { type: String, default: null},
     //Estado
-    state: { type: Boolean, default: true },
+    state: { type: Boolean, default: false },
     //Rol de usuario
     role: { type: String, default: "user-role" },
     //Preferencia de lectura opciones: paginada | cascada
     reader: { type: Boolean, default: false },
+    //Numero de validación para registro nuevo
+    validatorNumber: { type: Number, default: null},
     //Fecha de registro del usuario/autor
     date: { type: Date, default: Date.now }
 });

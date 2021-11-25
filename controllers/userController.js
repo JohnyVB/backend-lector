@@ -2,9 +2,8 @@ const { response, request } = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-
 const userModel = require('../models/userModel');
-
+const { sendEmailActivation } = require('../helpers/emailHandler');
 
 const controller = {
     getUser: async (req = request, res = response) => {
@@ -74,17 +73,27 @@ const controller = {
 
     saveUser: async (req = request, res = response) => {
 
-        const { name, lastname, email, password } = req.body;
-        const usuario = new userModel({ name, lastname, email, password });
+        try {
+            const { name, lastname, email, password } = req.body;
+            const validatorNumber = Math.trunc(Math.floor(100000 + Math.random() * 900000));
+            const usuario = new userModel({ name, lastname, email, password, validatorNumber });
 
-        const salts = bcrypt.genSaltSync();
-        usuario.password = bcrypt.hashSync(password, salts);
+            const salts = bcrypt.genSaltSync();
+            usuario.password = bcrypt.hashSync(password, salts);
 
-        await usuario.save()
+            await usuario.save();
 
-        res.status(200).send({
-            usuario
-        });
+            sendEmailActivation(email, validatorNumber);
+
+            res.status(200).send({
+                usuario
+            });
+
+        } catch (error) {
+            return res.status(500).send({
+                error
+            });
+        }
 
     },
 

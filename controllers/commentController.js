@@ -5,7 +5,7 @@ const articleModel = require('../models/articleModel');
 const chapterModel = require('../models/chapterModel');
 const notifyModel = require('../models/notifyModel');
 
-const { sendEmail } = require('../helpers/sendEmail');
+const { sendEmailNotification } = require('../helpers/emailHandler');
 
 const controller = {
 
@@ -101,12 +101,11 @@ const controller = {
         const notificacion = new notifyModel(dataNotify);
         await notificacion.save();
 
-        const enviarEmail = await sendEmail(model.user.email, req.usuario.name, dataNotify.data.title ,model.title );
+        await sendEmailNotification(model.user.email, req.usuario.name, dataNotify.data.title ,model.title );
 
         res.status(200).send({
             comentario,
-            notificacion,
-            enviarEmail
+            notificacion
         });
     },
 
