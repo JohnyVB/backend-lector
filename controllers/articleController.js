@@ -19,7 +19,7 @@ const controller = {
 
   getArticles: async (req = request, res = response) => {
 
-    const {start, end} = req.body;
+    const {start = 0, end = 10} = req.body;
     const query = { state: true };
 
     const articulos = await articleModel.find(query)
