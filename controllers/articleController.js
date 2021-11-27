@@ -19,21 +19,18 @@ const controller = {
 
   getArticles: async (req = request, res = response) => {
 
-    const { cantidad = 10, inicio = 0 } = req.params;
+    const {start, end} = req.body;
     const query = { state: true };
 
-    const [total, articulos] = await Promise.all([
-      articleModel.countDocuments(query),
-      articleModel.find(query)
-        .populate('user')
-        .populate({ path: 'chapter', options: { sort: { date: -1 }, limit: 6 }})
-        .sort({chapter: -1 })
-        .skip(Number(inicio))
-        .limit(Number(cantidad))
-    ]);
+    const articulos = await articleModel.find(query)
+      .populate('user')
+      .populate({ path: 'chapter', options: { sort: { date: -1 }, limit: 6 }})
+      .sort({chapter: -1 })
+      .skip(Number(start))
+      .limit(Number(end));
 
     res.status(200).send({
-      total,
+      total: articulos.length,
       articulos
     });
   },

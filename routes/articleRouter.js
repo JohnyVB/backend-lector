@@ -16,7 +16,7 @@ router.get('/:id', [
 ], getArticle);
 
 
-router.get('/count/:cantidad', getArticles);
+router.post('/', getArticles);
 
 router.get('/user/:id', [
     check('id', 'El ID es obligatorio').not().isEmpty(),
