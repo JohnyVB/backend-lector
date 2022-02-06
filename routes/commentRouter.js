@@ -10,7 +10,7 @@ const { validarPropiedad } = require('../middleware/validarPropiedad');
 
 const router = Router();
 
-router.get('/:coleccion/:id/:order',[
+router.post('/:coleccion/:id/:order',[
     check('id', 'El ID de la entidad es obligatorio').not().isEmpty(),
     check('id', 'El ID de la entidad debe ser valido').isMongoId(),
     check('coleccion').custom(coleccion => coleccionesPermitidas(coleccion, ['article', 'chapter'])),

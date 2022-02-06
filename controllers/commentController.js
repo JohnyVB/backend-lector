@@ -11,7 +11,8 @@ const controller = {
 
     getComments: async (req = request, res = response) => {
 
-        const { id, coleccion, order, inicio = 0, fin = 10 } = req.params;
+        const {id, coleccion, order = -1} = req.params;
+        const {inicio = 0, fin = 10} = req.body;
 
         const query = {
             state: true

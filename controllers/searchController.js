@@ -5,20 +5,29 @@ const articleModel = require('../models/articleModel');
 const controller = {
     getData: async (req = request, res = response) => {
 
-        const { search } = req.params;
-        const regex = new RegExp(search, 'i');
-        const data = await articleModel.find({ 
-            $or: [
-                { title: regex }, 
-                { genders: regex },
-                { type: regex },
-                { progress: regex }
-            ]
-        });
+        try {
+            const { search } = req.params;
+            const regex = new RegExp(search, 'i');
+            const articulos = await articleModel.find({
+                state: true, 
+                $or: [
+                    { title: regex }, 
+                    { genders: regex },
+                    { type: regex },
+                    { progress: regex }
+                ] 
+            });
 
-        res.status(200).send({
-            data
-        });
+            return res.status(200).send({
+                total: articulos.length,
+                articulos
+            });
+        } catch (error) {
+            return res.status(401).send({
+                msg: 'Error en getData',
+                error
+            });
+        }   
     }
 };
 

@@ -41,7 +41,7 @@ const controller = {
     const query = { user: id, state: true };
 
 
-    const [total, articles] = await Promise.all([
+    const [total, articulos] = await Promise.all([
       articleModel.countDocuments(query),
       articleModel.find(query)
         .skip(Number(inicio))
@@ -50,7 +50,7 @@ const controller = {
 
     res.status(200).send({
       total,
-      articles
+      articulos
     });
 
   },

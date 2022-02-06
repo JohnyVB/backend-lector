@@ -20,7 +20,8 @@ const controller = {
 
     getChaptersPorUnArticle: async (req = request, res = response) => {
 
-        const { id, order, inicio = 0, fin = 10 } = req.params;
+        const { id, order } = req.params;
+        const { inicio = 0, fin = 10 } = req.body;
         const query = { state: true, article: id };
         const queryOrder = {
             date: Number(order)
