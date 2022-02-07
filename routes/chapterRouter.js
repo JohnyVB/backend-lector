@@ -16,7 +16,7 @@ router.get('/:id', [
     validarCampos
 ], getChapter)
 
-router.post('/art/:id', [
+router.post('/art/:id/:order', [
     check('id', 'El ID es obligatorio').not().isEmpty(),
     check('id', 'El ID debe ser valido').isMongoId(),
     check('id').custom(existeArticuloPorId),
