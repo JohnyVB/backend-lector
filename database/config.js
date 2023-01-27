@@ -5,6 +5,7 @@ const dbConnection = async () => {
     try {
 
         await mongoose.connect(process.env.BDPROD, {
+            dbName: 'api-rest-lector',
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useCreateIndex: true,
